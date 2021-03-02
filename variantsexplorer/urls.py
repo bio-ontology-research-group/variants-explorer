@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from variantsexplorer.views import JobView, JobInstanceView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    path('api/job', JobView.as_view()),
+    path('api/job/<jobid>', JobInstanceView.as_view()),
 ]

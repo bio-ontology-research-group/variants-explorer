@@ -1,0 +1,100 @@
+<div class="card mb-4 wow fadeIn mt-2">
+<div class="card-body">
+    <h4 class="font-weight-bold pb-3"><a routerLink="help" class="text-muted">Varaints Explorer <i class="fas fa-info-circle"></i></a></h4>
+    <p>
+    <button type="button" class="btn btn-green" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed"
+        aria-controls="collapseExample">
+        New Job
+    </button>
+    </p>
+    <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+    <div class="card">
+        <div class="card-body bg-form">
+            <form class="col-md-8" [formGroup]="uploadForm">
+            <div class="mb-4">
+                <h4 class="mb-3 font-weight-bold">New Job</h4>
+                <p>Upload variants for homo sapiens.</p>
+            </div>
+            <div class="form-group">
+                <label for="title" class="required">Name of this job (optional)</label>
+                <input type="text" class="form-control form-control-sm" id="title" placeholder="Name of this job" formControlName="name">
+            </div>
+            <div class="form-group">
+                <label for="title">Either paste data</label>
+                <textarea class="form-control form-control-sm" id="exampleFormControlTextarea1" formControlName="content" rows="5"></textarea>
+                <div>
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item">Examples:</li>
+                    <li class="list-inline-item"><button (click)="example('vcf')" class="btn btn-link p-0 example">VCF</button>,</li>
+                    <li class="list-inline-item"><button (click)="example('identifiers')" class="btn btn-link p-0 example">Variant identifiers</button>,</li>
+                    <li class="list-inline-item"><button (click)="example('ensembl')" class="btn btn-link p-0 example">Ensembl default</button>,</li>
+                    <li class="list-inline-item"><button (click)="example('hgvs')" class="btn btn-link p-0 example">HGVS notations</button></li>
+                </ul>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group  col-md-6">
+                    <label for="file">or Upload File</label>
+                    <input type="file" #fileUpload id="fileUpload" class="form-control-file" id="file" 
+                        accept=".vcf,.vcf.gz" formControlName="file" (change)="uploadFile($event.target.files)">
+                    <small class="form-text text-muted">VCF file format (either in .vcf or .vcf.gz). </small>
+                    <div class="invalid-field" *ngIf="f.file.invalid && (f.file.dirty || f.file.touched)">
+                        <span *ngIf="f.file.errors.atleastOneFieldRequired">
+                            either data field or file upload field is required
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="title">Assembly: </label>
+                <input type="radio" formControlName="assembly" class="with-gap" value="GRCh38" class="ml-2">
+                <label class="form-check-label" for="assembly" class="pl-2">GRCh38</label>
+                <input type="radio" formControlName="assembly" class="with-gap" value="GRCh37" class="ml-2">
+                <label class="form-check-label" for="assembly" class="pl-2">GRCh37</label>
+            </div>
+            <div class="form-row mt-3">
+                <button type="submit" class="btn btn-green" [disabled]="uploadForm.invalid" (click)="onSubmit()">Run</button>
+                <button type="submit" class="btn btn-secondary ml-2" (click)="onCancel()">Cancel</button>
+            </div>
+            </form>
+        </div>
+    </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-12"><h5 class="font-weight-bold mb-2">Job History</h5></div>
+        <div class="col-12"><button class="btn btn-sm btn-green" (click)="findJobs()" placement="bottom" ngbTooltip="Refresh"><i class="fa fa-sync"></i> Refresh</button></div>
+    </div>
+    <div class="row pl-3 pt-3 pr-3">
+        <table class="table table-sm table-striped table-bordered">
+        <thead>
+            <tr class="header-grey">
+            <th scope="col">Jobs</th>
+            <th scope="col">Assembly</th>
+            <th scope="col">Status</th>
+            <th scope="col">Submitted at</th>
+            <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let job of jobPage; let jobIndex = index">
+                <td>{{job.name}}</td>
+                <td>{{job.assembly}}</td>
+                <td><span class="badge " [ngClass]="{'badge-success':job.status == 'Done', 'badge-secondary':job.status == 'Queued', 'badge-danger':job.status == 'Failed'}">{{job.status}}</span></td>
+                <td>{{job.submitted_at}}</td>
+                <td class="text-right"><a [href]="'/job/' + job._id" class="text-dark"><i class="fas fa-eye"></i></a><a (click)="delete(job._id)" class="btn text-dark p-0 pl-2"><i class="fas fa-trash-alt"></i></a></td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+    <div class="row panel-footer ml-3" *ngIf="this.jobs.length > 20">
+        <select class="custom-select items-dropdown" style="width: auto" [(ngModel)]="pageSize">
+            <option [ngValue]="10">10 items per page</option>
+            <option [ngValue]="20">20 items per page</option>
+            <option [ngValue]="50">50 items per page</option>
+        </select>
+        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize" [rotate]="true" 
+            [maxSize]="5" class="pl-3">
+        </ngb-pagination>
+    </div>
+</div>
+</div>

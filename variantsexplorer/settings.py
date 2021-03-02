@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework', 
+    'variantsexplorer'
 ]
 
 MIDDLEWARE = [
@@ -118,3 +120,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+BASE_DIR = 'vep_data'
+INPUT_DIR = 'input'
+OUTPUT_DIR = 'output'
+VEP_CONTAINER_BASE_DIR= '/opt/vep/.vep'

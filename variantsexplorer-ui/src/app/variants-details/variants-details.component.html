@@ -1,0 +1,39 @@
+<div class="card mb-4 wow fadeIn mt-2">
+<div class="card-body">
+    <h4 class="font-weight-bold pb-3"><a routerLink="help" class="text-muted">Results <i class="fas fa-info-circle"></i></a></h4>
+    <div class="row p-3">
+        <div class="col-12"><h5 class="font-weight-bold pb-3">Result Preview</h5></div>
+        <table class="table table-sm table-striped table-bordered">
+        <thead>
+            <tr>
+            <th scope="col">Uploaded Variant</th>
+            <th scope="col">Location</th>
+            <th scope="col">Allele</th>
+            <th scope="col">Consequence</th>
+            <th scope="col">Symbol</th>
+            <th scope="col">Gene</th>
+            <th scope="col">Feature type</th>
+            <th scope="col">Feature</th>
+            <th scope="col">Polyphen</th>
+            <th scope="col">SIFT</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let entry of job.output_data; let outIndex = index">
+                <th scope="row">{{entry['#Uploaded_variation']}}</th>
+                <td>{{entry.Location}}</td>
+                <td>{{entry.Allele}}</td>
+                <td>{{entry.Consequence}}</td>
+                <td>{{entry.SYMBOL}}</td>
+                <td>{{entry.Gene}}</td>
+                <td>{{entry.Feature_type}}</td>
+                <td>{{entry.Feature}}</td>
+                <td>{{entry.PolyPhen}}</td>
+                <td>{{entry.SIFT}}</td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+</div>
+</div>
