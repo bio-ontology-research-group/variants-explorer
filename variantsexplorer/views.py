@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from variantsexplorer import db
+from variantsexplorer.options import FIELD_OPTIONS
 
 logger = logging.getLogger(__name__) 
 
@@ -84,6 +85,32 @@ class JobInstanceView(APIView):
             logger.exception("message")
     
 
+class RecordsView(APIView):
+    """
+    List variant records by given criteria
+    """
+
+    service = VariantAnalyzer()
+    def get(self, request, jobid, format=None):
+        try:
+            limit = request.GET.get('limit', None)
+            offset = request.GET.get('offset', None)
+            result = self.service.find_records(jobid, int(limit), int(offset))
+            return Response(result)
+        except Exception as e:
+            logger.exception("message")
+
+
+
+class FieldConfigView(APIView):
+    """
+    Fields configuration
+    """
+    def get(self, request, jobid, format=None):
+        try:
+            return Response(FIELD_OPTIONS)
+        except Exception as e:
+            logger.exception("message")
     
 
 

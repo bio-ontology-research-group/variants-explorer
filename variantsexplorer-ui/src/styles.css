@@ -67,3 +67,42 @@
     background-color:rgba(47,158,141,1) !important;
     border-color: rgba(47,158,141,1) !important;
 }
+
+.table .thead-green th {
+    color: #fff;
+    background-color: rgba(47,158,141,1);
+    border-color:  rgb(38, 134, 120);
+}
+
+th[sortable] {
+    cursor: pointer;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+th[sortable]:after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: "\f0dc";
+    padding-left: 10px;
+}
+
+th[sortable].asc:after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: "\f0de";
+    padding-left: 10px;
+}
+
+th[sortable].desc:after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: "\f0dd";
+    padding-left: 10px;
+}
+
+.bg-filter {
+    background-color: #38618e !important;
+}

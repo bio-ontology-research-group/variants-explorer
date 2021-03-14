@@ -1,12 +1,47 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, OnInit, ViewChild, Directive, Input, Output, EventEmitter, QueryList, ViewChildren } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toJSDate } from '@ng-bootstrap/ng-bootstrap/datepicker/ngb-calendar';
 import { of } from 'rxjs';  
 import { interval } from 'rxjs';
-import { catchError, map } from 'rxjs/operators'; 
+import { catchError, map, startWith } from 'rxjs/operators'; 
 import { VariantsExplorerService } from '../variants-explorer.service';
+
+export type SortColumn = 'name' | 'submitted_at' | 'status' | '';
+export type SortDirection = 'asc' | 'desc' | '';
+const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
+
+export interface SortEvent {
+  column: SortColumn;
+  direction: SortDirection;
+}
+
+@Directive({
+  selector: 'th[sortable]',
+  host: {
+    '[class.asc]': 'direction === "asc"',
+    '[class.desc]': 'direction === "desc"',
+    '(click)': 'rotate()'
+  }
+})@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
+})
+export class ListJobSortableHeader {
+
+  @Input() sortable: SortColumn = '';
+  @Input() direction: SortDirection = '';
+  @Output() sort = new EventEmitter<SortEvent>();
+
+  rotate() {
+    this.direction = rotate[this.direction];
+    this.sort.emit({column: this.sortable, direction: this.direction});
+  }
+}
+
+const compare = (v1: string | number, v2: string | number) => v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
 
 @Component({
   selector: 'app-home',
@@ -14,6 +49,8 @@ import { VariantsExplorerService } from '../variants-explorer.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+  @ViewChildren(ListJobSortableHeader) headers: QueryList<ListJobSortableHeader>;
+
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef;
   file = null;
   
@@ -22,12 +59,21 @@ export class HomeComponent implements OnInit {
   isCollapsed = true;
   requiredError = "this field is required";
   errorReport = '';
-  jobs = []
+  jobs = [];
+  jobsFiltered = [];
   GRCh38 = 'GRCh38';
 
   page = 1;
   pageSize = 20;
-  collectionSize = 0
+  collectionSize = 0;
+  filter = new FormControl('');
+
+  jobsFilter = (text: string): any[] => {
+    return this.jobs.filter(job => {
+      const term = text.toLowerCase();
+      return job.name.toLowerCase().includes(term) || job.submitted_at.toLowerCase().includes(term);
+    });
+  }
 
   constructor(private veSrv: VariantsExplorerService,
     private fb: FormBuilder,
@@ -43,6 +89,13 @@ export class HomeComponent implements OnInit {
     }, {
       validator: AtleastOneFieldRequired('content', 'file')
     });
+
+
+    this.filter.valueChanges.pipe(
+      startWith(''),
+      map(text => this.jobsFilter(text))
+    ).subscribe(data => {this.jobs = data;});
+
     this.findJobs();
     // refresh list after 10 seconds 
     interval(10000).subscribe(num => { 
@@ -117,6 +170,7 @@ export class HomeComponent implements OnInit {
   findJobs(){
     this.veSrv.find().subscribe(res => {
       this.jobs = res
+      this.jobsFiltered = this.jobsFilter(this.filter.value);
     });
   }
 
@@ -124,6 +178,24 @@ export class HomeComponent implements OnInit {
     this.veSrv.deleteJob(jobId).subscribe(res => {
       this.findJobs();
     });
+  }
+
+  onSort({column, direction}: SortEvent) {
+    // resetting other headers
+    this.headers.forEach(header => {
+      if (header.sortable !== column) {
+        header.direction = '';
+      }
+    });
+
+    if (direction === '' || column === '') {
+      this.jobsFiltered = this.jobsFilter(this.filter.value);
+    } else {
+      this.jobsFiltered = this.jobsFiltered.sort((a, b) => {
+        const res = compare(a[column], b[column]);
+        return direction === 'asc' ? res : -res;
+      });
+    }
   }
 
   example(exampleType) {

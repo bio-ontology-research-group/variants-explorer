@@ -65,13 +65,18 @@
         <div class="col-12"><button class="btn btn-sm btn-green" (click)="findJobs()" placement="bottom" ngbTooltip="Refresh"><i class="fa fa-sync"></i> Refresh</button></div>
     </div>
     <div class="row pl-3 pt-3 pr-3">
+        <div class="col-12 p-2 bg-filter">
+        <div class="form-inline">
+            <input class="form-control-sm ml-2" type="text" [formControl]="filter" placeholder="filter"/>
+        </div>
+        </div>
         <table class="table table-sm table-striped table-bordered">
-        <thead>
-            <tr class="header-grey">
-            <th scope="col">Jobs</th>
+        <thead class="thead-light">
+            <tr>
+            <th scope="col" sortable="name" (sort)="onSort($event)">Jobs</th>
             <th scope="col">Assembly</th>
-            <th scope="col">Status</th>
-            <th scope="col">Submitted at</th>
+            <th scope="col" sortable="status" (sort)="onSort($event)">Status</th>
+            <th scope="col" sortable="submitted_at" (sort)="onSort($event)">Submitted at</th>
             <th scope="col">Action</th>
             </tr>
         </thead>

@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from variantsexplorer.views import JobView, JobInstanceView
+from variantsexplorer.views import FieldConfigView, JobView, JobInstanceView, RecordsView
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/job', JobView.as_view()),
     path('api/job/<jobid>', JobInstanceView.as_view()),
+    path('api/job/<jobid>/record', RecordsView.as_view()),
+    path('api/jobs/config', FieldConfigView.as_view()),
 ]

@@ -27,9 +27,13 @@ def execute(id):
     rel_input_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, settings.INPUT_DIR, job['filepath'].rsplit("/", 1)[1])
     out_filepath = os.path.join(settings.OUTPUT_DIR, job['filepath'].rsplit("/", 1)[1])
     rel_out_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, out_filepath)
+    GO_ANNO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.go.bed.gz')
+    PHENO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
+    dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     assembly = job['assembly']
     CMD = f'docker run -t -i -v {cwd}/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
-        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --cache --tab --no_stats --polyphen b --sift b '
+        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
+        --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
     print(cwd, rel_input_filepath, out_filepath, CMD)
 
     process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
@@ -43,9 +47,11 @@ def execute(id):
     else:
         job['output_filepath'] = os.path.join(settings.BASE_DIR, out_filepath)
         job['status'] = DONE
-        df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=45)
+        df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=70)
         print(df.head())
-        job['output_data'] = df.to_dict('records')
+        records =  df.to_dict('records')
+        save_records(records, job)
+
         # with open(job['output_filepath'] , 'r') as output_file:
         #     for line in output_file.readlines():
         #         entry = json.loads(line)
@@ -54,6 +60,21 @@ def execute(id):
     job['modified_at'] = datetime.now()
     print(error, "|", job)
     db.update(id, job)
+
+
+def save_records(records, job):
+    for item in records:
+        item['job_id'] = str(job['_id'])
+        item['SIFT_object'] = parse_score_field(item['SIFT'])
+        item['PolyPhen_object'] = parse_score_field(item['PolyPhen'])
+        db.insert_record(item)
+
+def parse_score_field(score):
+    if not score.strip() or '-' in score:
+        return None
+    
+    parts =  score.strip().split('(')
+    return {'term': parts[0], 'score': float(parts[1][:-1])}
 
 
 class ValidationError(Exception):
@@ -100,12 +121,17 @@ class VariantAnalyzer:
             obj['output_filepath'] = None
         return obj
 
+    def find_records(self, job_id, limit=10, offset=None):
+        return db.find_records(job_id, limit, offset)
+
     def delete(self, id):
         job = db.get(id)
         if os.path.exists(job['filepath']):
             os.remove(job['filepath'])
         if 'output_filepath' in job and os.path.exists(job['output_filepath']):
             os.remove(job['output_filepath'])
+
+        db.delete_records(id)
         return db.delete(id)
 
     def write_file(self, file, filepath):

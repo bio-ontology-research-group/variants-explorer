@@ -36,17 +36,37 @@ export class VariantsExplorerService {
     return this.http.get(url, this.options);
   }
 
+  findRecords(id, limit:number, offset:number): Observable<any>  {
+    var queryStr = '';
+    if (limit) {
+      queryStr += queryStr ? '&' : '';
+      queryStr += '&limit=' + limit;
+    }
+    
+    if (offset != null) {
+      queryStr += queryStr ? '&' : '';
+      queryStr += '&offset=' + offset;
+    }
+
+    var url = `${this.URL}/${id}/record?${queryStr}`;
+    return this.http.get(url, this.options);
+  }
+
   deleteJob(id): Observable<any>  {
     var url = `${this.URL}/${id}`;
     return this.http.delete(url, this.options);
   }
-  
   
   submitJob(formData){
     return this.http.post<any>(`${this.URL}`, formData, {  
        reportProgress: true,  
        observe: 'events'  
     });  
+  }
+
+  getConfig(): Observable<any>  {
+    var url = `${this.URL}/config`;
+    return this.http.get(url, this.options);
   }
 
 }
