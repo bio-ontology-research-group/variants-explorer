@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -120,7 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-BASE_DIR = 'vep_data'
+DATA_DIR = os.path.join(BASE_DIR, 'vep_data')
 INPUT_DIR = 'input'
 OUTPUT_DIR = 'output'
 VEP_CONTAINER_BASE_DIR= '/opt/vep/.vep'

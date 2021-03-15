@@ -106,7 +106,7 @@ class FieldConfigView(APIView):
     """
     Fields configuration
     """
-    def get(self, request, jobid, format=None):
+    def get(self, request, format=None):
         try:
             return Response(FIELD_OPTIONS)
         except Exception as e:

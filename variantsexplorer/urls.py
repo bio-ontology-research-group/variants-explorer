@@ -22,5 +22,5 @@ urlpatterns = [
     path('api/job', JobView.as_view()),
     path('api/job/<jobid>', JobInstanceView.as_view()),
     path('api/job/<jobid>/record', RecordsView.as_view()),
-    path('api/jobs/config', FieldConfigView.as_view()),
+    path('api/config', FieldConfigView.as_view()),
 ]

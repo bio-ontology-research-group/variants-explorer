@@ -1,7 +1,7 @@
-version: "2.2"
+version: "3.9"
 services:
   variantsexplorer-ui:
-    build: .
+    build: ./variantsexplorer-ui
     container_name: variantsexplorer-ui
     ports:
       - 80:80

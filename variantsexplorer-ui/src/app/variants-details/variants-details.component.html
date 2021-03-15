@@ -91,7 +91,7 @@
                 <td>{{entry.Allele}}</td>
                 <td>{{entry.Consequence}}</td>
                 <td>{{entry.SYMBOL}}</td>
-                <td>{{entry.Gene}}</td>
+                <td><a [href]="'https://asia.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + entry.Gene" target="_blank">{{entry.Gene}}</a></td>
                 <td>{{entry.Feature_type}}</td>
                 <td>{{entry.Feature}}</td>														
                 <td>{{entry.cDNA_position}}</td>
@@ -113,8 +113,15 @@
                 <td>{{entry.UNIPARC}}</td>
                 <td>{{entry.UNIPROT_ISOFORM}}</td>
                 <td>{{entry.SOURCE}}</td>
-                <td>{{entry.SIFT}}</td>
-                <td>{{entry.PolyPhen}}</td>
+                <td>
+                    <span *ngIf="entry.SIFT_object"><span class="badge badge-lg" [ngbTooltip]="entry.SIFT_object.term" [ngClass]="{'badge-success': entry.SIFT_object.term == 'tolerated', 'badge-danger': entry.SIFT_object.term == 'deleterious'}">{{entry.SIFT_object.score}}</span></span>
+                    <span *ngIf="!entry.SIFT_object">{{entry.SIFT}}</span></td>
+                <td>
+                    <span *ngIf="entry.PolyPhen_object">
+                        <span class="badge badge-lg" [ngbTooltip]="entry.PolyPhen_object.term" [ngClass]="{'badge-primary': entry.PolyPhen_object.term == 'unknown', 'badge-success': entry.PolyPhen_object.term == 'benign', 'badge-warning': entry.PolyPhen_object.term == 'possibly_damaging', 'badge-danger': entry.PolyPhen_object.term == 'probably_damaging'}">
+                        {{entry.PolyPhen_object.score}}</span>
+                    </span>
+                    <span *ngIf="!entry.PolyPhen_object">{{entry.PolyPhen}}</span></td>
                 <td>{{entry.HGVSc}}</td>
                 <td>{{entry.HGVSp}}</td>
                 <td>{{entry.HGVS_OFFSET}}</td>

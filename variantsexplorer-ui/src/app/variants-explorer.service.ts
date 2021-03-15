@@ -65,7 +65,7 @@ export class VariantsExplorerService {
   }
 
   getConfig(): Observable<any>  {
-    var url = `${this.URL}/config`;
+    var url = `/api/config`;
     return this.http.get(url, this.options);
   }
 

@@ -19,7 +19,7 @@ DONE = 'Done'
 FAILED = 'Failed'
 
 def execute(id):
-    os.makedirs(os.path.join(settings.BASE_DIR, settings.OUTPUT_DIR), exist_ok=True)
+    os.makedirs(os.path.join(settings.DATA_DIR, settings.OUTPUT_DIR), exist_ok=True)
     job = db.get(id)
     print(job, id)
     cwd = os.getcwd()
@@ -45,7 +45,7 @@ def execute(id):
         job['error'] = error
         job['status'] = FAILED
     else:
-        job['output_filepath'] = os.path.join(settings.BASE_DIR, out_filepath)
+        job['output_filepath'] = os.path.join(settings.DATA_DIR, out_filepath)
         job['status'] = DONE
         df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=70)
         print(df.head())
@@ -85,15 +85,15 @@ class VariantAnalyzer:
 
     def submit_job(self, job, file=None, filename=None):
         print(job, file, filename)
-        os.makedirs(os.path.join(settings.BASE_DIR, settings.INPUT_DIR), exist_ok=True)
+        os.makedirs(os.path.join(settings.DATA_DIR, settings.INPUT_DIR), exist_ok=True)
         if file:
-            filepath = os.path.join(settings.BASE_DIR, settings.INPUT_DIR,  self.create_incremented_name(str(file)))
+            filepath = os.path.join(settings.DATA_DIR, settings.INPUT_DIR,  self.create_incremented_name(str(file)))
             self.write_file(file, filepath)
             job['filepath'] = filepath
             name_part=filename
 
         elif 'content' in job:
-            filepath = os.path.join(settings.BASE_DIR, settings.INPUT_DIR,  str(uuid.uuid4()) + ".vcf")
+            filepath = os.path.join(settings.DATA_DIR, settings.INPUT_DIR,  str(uuid.uuid4()) + ".vcf")
             self.write_text(job['content'], filepath)
             job['filepath'] = filepath
             name_part = 'pasted data'
@@ -152,7 +152,7 @@ class VariantAnalyzer:
         while True:
             filename = '{}.{:06d}{}'.format(name, index, extension)
             index += 1
-            if not os.path.lexists(os.path.join(settings.BASE_DIR, settings.INPUT_DIR, filename)):
+            if not os.path.lexists(os.path.join(settings.DATA_DIR, settings.INPUT_DIR, filename)):
                 break
 
         return filename
