@@ -128,4 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 mongo
-vep_data
+vep_data/input
+vep_data/output
+vep_data/homo_sapiens
+vep_data/samples
+
