@@ -1,0 +1,12 @@
+docker pull ensemblorg/ensembl-vep
+docker run -t -i -v $(pwd)/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep
+
+# to set up the cache and corresponding FASTA for human GRCh38
+docker run -t -i -v $(pwd)/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep perl INSTALL.pl -a cf -s homo_sapiens -y GRCh38
+#Install all the available plugins:
+docker run -t -i -v $(pwd)/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep perl INSTALL.pl -a cfp -s homo_sapiens -y GRCh38 -g all
+
+# or install a defined list of plugins:
+docker run -t -i -v $HOME/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep perl INSTALL.pl -a cfp -s homo_sapiens -y GRCh38 -g dbNSFP,CADD,G2P
+
+docker run -t -i -v $(pwd)/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep ./vep -i samples/sample.vcf --cache
