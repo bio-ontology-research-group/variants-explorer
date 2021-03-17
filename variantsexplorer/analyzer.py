@@ -135,12 +135,14 @@ class VariantAnalyzer:
         return db.delete(id)
 
     def write_file(self, file, filepath):
-        with open(filepath, 'wb+') as out_file:
+        os.umask(0)
+        with open(os.open(filepath, os.O_CREAT | os.O_WRONLY, 0o777), 'wb+') as out_file:
             for chunk in file.chunks():
                 out_file.write(chunk)
 
     def write_text(self, content, filepath):
-        with open(filepath, 'w+') as out_file:
+        os.umask(0)
+        with open(os.open(filepath, os.O_CREAT | os.O_WRONLY, 0o777), 'w+') as out_file:
             out_file.write(content)
 
     def get_name_and_extension(self, filename):
