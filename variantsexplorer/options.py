@@ -9,7 +9,7 @@ FIELD_OPTIONS = {
         { "code" : "benign", "display": "Benign", "description":"less than or equal to 0.446"},
         { "code" : "unknown", "display": "Unknown", "description":"unknown"},
     ],
-    "SIFT" : [ 
+    "Consequence" : [ 
         { "code" : "transcript_ablation", "display": "Transcript ablation", "description":"A feature ablation whereby the deleted region includes a transcript feature", "class":"SO:0001893", "ontology": "SO"},
         { "code" : "splice_acceptor_variant", "display": "Splice acceptor variant", "description":"A splice variant that changes the 2 base region at the 3' end of an intron", "class":"SO:0001574", "ontology": "SO"},
         { "code" : "splice_donor_variant", "display": "Splice donor variant", "description":"A splice variant that changes the 2 base region at the 5' end of an intron", "class":"SO:0001575", "ontology": "SO"},
@@ -30,7 +30,7 @@ FIELD_OPTIONS = {
         { "code" : "coding_sequence_variant", "display": "Coding sequence variant", "description":"SO:0001580", "class":"", "ontology": "SO"},
         { "code" : "mature_miRNA_variant", "display": "Mature miRNA variant", "description":"", "class":"SO:0001620", "ontology": "SO"},
         { "code" : "5_prime_UTR_variant", "display": "5 prime UTR variant", "description":"", "class":"SO:0001623", "ontology": "SO"},
-        { "code" : "3_prime_UTR_variant", "display": "", "description":"3 prime UTR variant", "class":"SO:0001624", "ontology": "SO"},
+        { "code" : "3_prime_UTR_variant", "display": "3 prime UTR variant", "description":"", "class":"SO:0001624", "ontology": "SO"},
         { "code" : "non_coding_transcript_exon_variant", "display": "Non coding transcript exon variant", "description":"", "class":"SO:0001792", "ontology": "SO"},
         { "code" : "intron_variant", "display": "Intron variant", "description":"", "class":"SO:0001627", "ontology": "SO"},
         { "code" : "NMD_transcript_variant", "display": "NMD transcript variant", "description":"", "class":"SO:0001621", "ontology": "SO"},

@@ -30,6 +30,7 @@
               "node_modules/@fortawesome/fontawesome-free/scss/regular.scss",
               "node_modules/@fortawesome/fontawesome-free/scss/brands.scss",
               "node_modules/animate.css/animate.css",
+              "node_modules/@ng-select/ng-select/themes/default.theme.css",
               "src/styles.css"
             ],
             "scripts": []

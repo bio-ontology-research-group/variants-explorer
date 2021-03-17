@@ -48,12 +48,43 @@ def get(id):
   col = db.jobs_col
   return col.find_one({"_id": ObjectId(str(id))})
 
-def find_records(job_id, limit=None, offset=None):
+def find_records(job_id, filter, limit=None, offset=None):
   col = db.records_col
-  data = list(col.find({"job_id": job_id}, limit=limit, skip=offset))
+  filter['job_id'] = job_id
+
+  for key in filter:
+    if isinstance(filter[key], list):
+      rangeFilter = None
+      for item in filter[key]:
+        if item.startswith('le'):
+          if rangeFilter:
+            rangeFilter['$lte'] = float(item[2:])
+          else:
+            rangeFilter = {'$lte' : float(item[2:])}
+
+        elif item.startswith('ge'):
+          if rangeFilter:
+            rangeFilter['$gte'] = float(item[2:])
+          else:
+            rangeFilter = {'$gte' : float(item[2:])}
+
+      if rangeFilter:
+        filter[key] = rangeFilter
+      else :
+        filter[key] = {"$in": filter[key]}
+
+    else: 
+      if 'le' == filter[key][:2]:
+        filter[key] = {'$lte': float(filter[key][2:])}
+      elif 'ge' == filter[key][:2]:
+        filter[key] = {'$gte': float(filter[key][2:])}
+
+  print(filter)
+
+  data = list(col.find(filter, limit=limit, skip=offset))
   for obj in data:
       obj['_id']=str(obj['_id'])
-  count = col.count_documents({"job_id": job_id})
+  count = col.count_documents(filter)
 
   result = {'data': data, 'total': count}
   return result
@@ -73,6 +104,18 @@ def insert_record(doc):
 def delete_records(job_id):
   col = db.records_col
   return col.delete_many({"job_id": str(id)})
+
+def next_seq_number(seq_name):
+  print(seq_name, ">>>>>>>>>>>")
+  seq = db.seqs_col.find_and_modify(
+        query={ '_id' : seq_name },
+        update={'$inc': {'count': 1}},
+        new=True)
+
+  if not seq: 
+    seq = {'_id': seq_name, "count":1}
+    db.seqs_col.insert_one({'_id': seq_name, "count":1})
   
+  return seq['count']
 
 

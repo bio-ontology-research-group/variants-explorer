@@ -106,3 +106,12 @@ th[sortable].desc:after {
 .bg-filter {
     background-color: #38618e !important;
 }
+
+.sidebar-filter {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

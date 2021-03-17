@@ -67,8 +67,14 @@ def save_records(records, job):
         item['job_id'] = str(job['_id'])
         item['SIFT_object'] = parse_score_field(item['SIFT'])
         item['PolyPhen_object'] = parse_score_field(item['PolyPhen'])
+        item['AF'] = parse_number_field(item['AF'])
         db.insert_record(item)
 
+def parse_number_field(value):
+    if not value.strip() or '-' in value:
+        return None
+    return float(value)
+    
 def parse_score_field(score):
     if not score.strip() or '-' in score:
         return None
@@ -121,8 +127,17 @@ class VariantAnalyzer:
             obj['output_filepath'] = None
         return obj
 
-    def find_records(self, job_id, limit=10, offset=None):
-        return db.find_records(job_id, limit, offset)
+    def find_records(self, job_id, filter, limit=10, offset=None ):
+        del filter['limit']
+        del filter['offset']
+        clone = filter.copy()
+        for key in clone:
+            if ',' in clone[key]:
+                filter[key] = filter[key].split(",")
+
+            if not clone[key].strip():
+               del filter[key]
+        return db.find_records(job_id, filter, limit, offset)
 
     def delete(self, id):
         job = db.get(id)
@@ -149,11 +164,10 @@ class VariantAnalyzer:
         return os.path.splitext(filename)
 
     def create_incremented_name(self, filename) -> str:
-        index = 1
+        index = db.next_seq_number('output_filename')
         name, extension = self.get_name_and_extension(filename)
         while True:
             filename = '{}.{:06d}{}'.format(name, index, extension)
-            index += 1
             if not os.path.lexists(os.path.join(settings.DATA_DIR, settings.INPUT_DIR, filename)):
                 break
 

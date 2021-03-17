@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { _ } from 'underscore';
+import  * as _ from 'underscore';
 import { Observable } from 'rxjs';
 
 @Injectable()
@@ -36,19 +36,13 @@ export class VariantsExplorerService {
     return this.http.get(url, this.options);
   }
 
-  findRecords(id, limit:number, offset:number): Observable<any>  {
-    var queryStr = '';
-    if (limit) {
-      queryStr += queryStr ? '&' : '';
-      queryStr += '&limit=' + limit;
+  findRecords(id, filter): Observable<any>  {
+    let params = new URLSearchParams();
+    for(let key in filter){
+        params.set(key, filter[key]) 
     }
     
-    if (offset != null) {
-      queryStr += queryStr ? '&' : '';
-      queryStr += '&offset=' + offset;
-    }
-
-    var url = `${this.URL}/${id}/record?${queryStr}`;
+    var url = `${this.URL}/${id}/record?${params.toString()}`;
     return this.http.get(url, this.options);
   }
 

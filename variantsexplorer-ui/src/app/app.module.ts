@@ -11,6 +11,7 @@ import { VariantsDetailsComponent } from './variants-details/variants-details.co
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { VariantsExplorerService } from './variants-explorer.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { VariantsExplorerService } from './variants-explorer.service';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    NgSelectModule,
     NgbModule,
     AppRoutingModule
   ],

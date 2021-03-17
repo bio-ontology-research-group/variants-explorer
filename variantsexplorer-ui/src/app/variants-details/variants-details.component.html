@@ -7,7 +7,7 @@
     </button>
     <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
         <div class="row p-3">
-            <table class="table table-sm table-striped col-6">
+            <table class="table table-sm table-striped col-6" *ngIf="job">
             <tbody>
                 <tr>
                 <th scope="row">Name</th>
@@ -31,6 +31,101 @@
     </div>
     <div class="row p-3">
         <div class="col-12"><h5 class="font-weight-bold pb-3">Result Preview</h5></div>
+        <div class="col-2 p-0 d-none d-md-block bg-light sidebar">
+            <ngb-accordion #a="ngbAccordion" activeIds="custom-panel-1,custom-panel-2">
+                <ngb-panel id="custom-panel-1">
+                    <ng-template ngbPanelHeader let-opened="opened">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="m-0">Select Filters</h5>
+                        <button ngbPanelToggle class="btn btn-link p-0"><i class="fas fa-caret-right" *ngIf="!opened"></i><i class="fas fa-caret-down" *ngIf="opened"></i></button>
+                    </div>
+                    </ng-template>
+                    <ng-template ngbPanelContent>
+                    <div *ngIf="fieldConfig && fieldConfig.Consequence" class="pb-2">
+                        <label for="consequence">Consequence</label>
+                        <ng-select
+                            [items]="fieldConfig.Consequence"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="display"
+                            placeholder="Select"
+                            (change)="onConsequenceSelect($event)"></ng-select>
+                        <!--<select class="form-control-sm" color="default" (change)="onConsequenceSelect($event)" >
+                            <option value="">Select</option>
+                            <option *ngFor="let term of fieldConfig.Consequence" value="{{term.code}}" [selected]='consequenceFilter == term.code'>{{term.display}}</option>
+                        </select>-->
+                    </div>
+                     <div class="form-group">
+                        <label for="sift">SIFT Prediction</label>
+                        <select class="form-control form-control-sm" color="default" (change)="onSiftSelect($event)" *ngIf="fieldConfig && fieldConfig.SIFT">
+                            <option value="">Select</option>
+                            <option *ngFor="let term of fieldConfig.SIFT" value="{{term.code}}" [selected]='siftFilter == term.code'>{{term.display}}</option>
+                        </select>
+                     </div>
+                     <div class="form-group">
+                        <label for="polyphen">PolyPhen Prediction</label>
+                        <select class="form-control form-control-sm" color="default" (change)="onPolyphenSelect($event)" *ngIf="fieldConfig && fieldConfig.PolyPhen">
+                            <option value="">Select</option>
+                            <option *ngFor="let term of fieldConfig.PolyPhen" value="{{term.code}}" [selected]='polyphenFilter == term.code'>{{term.display}}</option>
+                        </select>
+                     </div>
+                    </ng-template>
+                </ngb-panel>
+                <ngb-panel id="custom-panel-2">
+                    <ng-template ngbPanelHeader let-opened="opened">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="m-0">Score Ranges</h5>
+                        <button ngbPanelToggle class="btn btn-link p-0"><i class="fas fa-caret-right" *ngIf="!opened"></i><i class="fas fa-caret-down" *ngIf="opened"></i></button>
+                    </div>
+                    </ng-template>
+                    <ng-template ngbPanelContent>
+                     <div class="form-group">
+                        <label for="siftScore">AF Score</label>
+                        <div class="form-row align-items-center">
+                            <div class="col-sm-4 my-1">
+                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Min" [formControl]="afMinFilter">
+                            </div>
+                            <div class="col-sm-4 my-1">
+                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Max" [formControl]="afMaxFilter">
+                            </div>
+                            <div class="col-auto my-1">
+                            <button class="btn btn-sm btn-primary" (click)="findVariantRecords()">Go</button>
+                            </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <label for="siftScore">SIFT Score</label>
+                        <div class="form-row align-items-center">
+                            <div class="col-sm-4 my-1">
+                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Min" [formControl]="siftMinFilter">
+                            </div>
+                            <div class="col-sm-4 my-1">
+                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Max" [formControl]="siftMaxFilter">
+                            </div>
+                            <div class="col-auto my-1">
+                            <button class="btn btn-sm btn-primary" (click)="findVariantRecords()">Go</button>
+                            </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <label for="siftScore">PolyPhen Score</label>
+                        <div class="form-row align-items-center">
+                            <div class="col-sm-4 my-1">
+                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Min" [formControl]="polyPhenMinFilter">
+                            </div>
+                            <div class="col-sm-4 my-1">
+                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Max" [formControl]="polyPhenMaxFilter">
+                            </div>
+                            <div class="col-auto my-1">
+                            <button class="btn btn-sm btn-primary" (click)="findVariantRecords()" >Go</button>
+                            </div>
+                        </div>
+                     </div>
+                    </ng-template>
+                </ngb-panel>
+            </ngb-accordion>
+        </div>
+        <div class="col-10">
         <table class="table table-sm table-striped table-responsive">
         <thead class="thead-light">
             <tr>
@@ -148,6 +243,7 @@
             <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize" [rotate]="true" 
                 [maxSize]="5" (pageChange)="loadPage($event)">
             </ngb-pagination>
+        </div>
         </div>
     </div>
 </div>
