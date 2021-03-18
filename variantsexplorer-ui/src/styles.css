@@ -55,11 +55,11 @@
 
 .page-item.active .page-link {    
     color: #fff;
-    background-color:rgba(47,158,141,1) !important;
-    border-color: rgba(47,158,141,1) !important;
+    background-color:#38618e !important;
+    border-color: #38618e !important;
 }
 .page-link {
-    color: rgba(47,158,141,1) i !important;
+    color: #38618e i !important;
     background-color: #fff !important;
 }
 .items-dropdown {

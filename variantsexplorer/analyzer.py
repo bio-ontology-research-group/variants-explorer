@@ -8,6 +8,7 @@ import pandas as pd
 
 from datetime import datetime
 from django.conf import settings
+from sys import platform
 import variantsexplorer.db as db
 
 logger = logging.getLogger(__name__) 
@@ -22,7 +23,6 @@ def execute(id):
     os.makedirs(os.path.join(settings.DATA_DIR, settings.OUTPUT_DIR), exist_ok=True)
     job = db.get(id)
     print(job, id)
-    cwd = os.getcwd()
     print(job['filepath'].rsplit("/", 1))
     rel_input_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, settings.INPUT_DIR, job['filepath'].rsplit("/", 1)[1])
     out_filepath = os.path.join(settings.OUTPUT_DIR, job['filepath'].rsplit("/", 1)[1])
@@ -31,10 +31,10 @@ def execute(id):
     PHENO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     assembly = job['assembly']
-    CMD = f'docker run -t -i -v {cwd}/vep_data:/opt/vep/.vep ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
+    CMD = f'docker run -t -i -v {get_volumn_param()} ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
         --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
         --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
-    print(cwd, rel_input_filepath, out_filepath, CMD)
+    print(rel_input_filepath, out_filepath, CMD)
 
     process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
     error = ''
@@ -82,7 +82,13 @@ def parse_score_field(score):
     parts =  score.strip().split('(')
     return {'term': parts[0], 'score': float(parts[1][:-1])}
 
-
+def get_volumn_param():
+    cwd = os.getcwd()
+    param = f'{cwd}/vep_data:/opt/vep/.vep'
+    if 'linux' in platform:
+        return param + ':Z'
+    else:
+        return param
 class ValidationError(Exception):
     """Base class for validation exceptions"""
     pass

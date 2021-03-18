@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VariantsExplorerService } from '../variants-explorer.service';
 import * as _ from 'underscore';
 import { NgSelectConfig } from '@ng-select/ng-select';
@@ -23,6 +23,7 @@ export class VariantsDetailsComponent implements OnInit {
   consequenceFilter = [];
   siftFilter = '';
   polyphenFilter = '';
+  queryParams = {};
 
 
   afMinFilter = new FormControl('');
@@ -34,6 +35,7 @@ export class VariantsDetailsComponent implements OnInit {
 
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
+    private router: Router,
     private config: NgSelectConfig) { 
     this.config.appendTo = 'body';
   }
@@ -46,10 +48,17 @@ export class VariantsDetailsComponent implements OnInit {
       });
       this.veSrv.getConfig().subscribe(res => {
         this.fieldConfig = res
-        console.log(res)
       })
       this.findVariantRecords();
     });    
+
+
+    this.route.queryParams.subscribe(params => {
+      this.page = 1;
+      console.log(params)
+      this.queryParams = Object.assign({}, params);
+      this.findVariantRecords();
+    });
   }
 
   loadPage(page: number) {
@@ -59,13 +68,20 @@ export class VariantsDetailsComponent implements OnInit {
     }
   }
 
+  onPageSizeChange(event){
+    this.page = 1;
+    this.findVariantRecords();
+  }
+
   findVariantRecords() {
     var offset = 0
     if (this.page > 1) {
       offset = this.pageSize * (this.page - 1)
     }
     
-    let filter = this.makeFilterObj(offset);
+    let filter = Object.assign({}, this.queryParams)
+    filter['limit'] = this.pageSize;
+    filter['offset'] = offset;
     this.veSrv.findRecords(this.jobId, filter).subscribe(res => {
       this.variantRecords = res['data'] && res['data'].length > 1 ? res['data'] : []; 
       this.collectionSize = res['total'];
@@ -73,59 +89,47 @@ export class VariantsDetailsComponent implements OnInit {
     });
   }
 
-  makeFilterObj(offset) {
-    let filter = {'limit': this.pageSize, 'offset': offset}
-    if (this.consequenceFilter && this.consequenceFilter.length > 0) {
-      filter['Consequence'] = this.consequenceFilter
-    }
-
-    if (this.siftFilter) {
-      filter['SIFT_object.term'] = this.siftFilter
-    }
-
-    if (this.polyphenFilter) {
-      filter['PolyPhen_object.term'] = this.polyphenFilter
-    }
-
-    filter['AF'] = []
-    if (this.afMinFilter.value) { 
-      filter['AF'].push('ge' + this.afMinFilter.value)
-    }
-    if (this.afMaxFilter.value) { 
-      filter['AF'].push('le' + this.afMaxFilter.value)
-    }
-
-    filter['SIFT_object.score'] = []
-    if (this.siftMinFilter.value) { 
-      filter['SIFT_object.score'].push('ge' + this.siftMinFilter.value)
-    }
-    if (this.siftMaxFilter.value) { 
-      filter['SIFT_object.score'].push('le' + this.siftMaxFilter.value)
-    }
-
-    filter['PolyPhen_object.score'] = []
-    if (this.polyPhenMinFilter.value) { 
-      filter['PolyPhen_object.score'].push('ge' + this.polyPhenMinFilter.value)
-    }
-    if (this.polyPhenMaxFilter.value) { 
-      filter['PolyPhen_object.score'].push('le' + this.polyPhenMaxFilter.value)
-    }
-    return filter;
-  }
-
   onSiftSelect(event) {
-    this.siftFilter = event.target.value;
-    this.findVariantRecords();
+    this.queryParams['SIFT_object.term'] = event.target.value;
+    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
   }
   
   onConsequenceSelect(event) {
-    this.consequenceFilter = _.map(event, obj => obj.code);
-    this.findVariantRecords();
+    this.queryParams['Consequence'] = _.map(event, obj => obj.code);
+    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
   }
 
   onPolyphenSelect(event) {
-    this.polyphenFilter = event.target.value;
-    this.findVariantRecords();
+    console.log( event.target.value, this.queryParams)
+    this.queryParams['PolyPhen_object.term'] = event.target.value;
+    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
+  }
+
+  setFilters() {
+    this.queryParams['AF'] = []
+    if (this.afMinFilter.value) { 
+      this.queryParams['AF'].push('ge' + this.afMinFilter.value)
+    }
+    if (this.afMaxFilter.value) { 
+      this.queryParams['AF'].push('le' + this.afMaxFilter.value)
+    }
+
+    this.queryParams['SIFT_object.score'] = []
+    if (this.siftMinFilter.value) { 
+      this.queryParams['SIFT_object.score'].push('ge' + this.siftMinFilter.value)
+    }
+    if (this.siftMaxFilter.value) { 
+      this.queryParams['SIFT_object.score'].push('le' + this.siftMaxFilter.value)
+    }
+
+    this.queryParams['PolyPhen_object.score'] = []
+    if (this.polyPhenMinFilter.value) { 
+      this.queryParams['PolyPhen_object.score'].push('ge' + this.polyPhenMinFilter.value)
+    }
+    if (this.polyPhenMaxFilter.value) { 
+      this.queryParams['PolyPhen_object.score'].push('le' + this.polyPhenMaxFilter.value)
+    }
+    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
   }
 
 }
