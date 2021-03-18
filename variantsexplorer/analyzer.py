@@ -13,7 +13,10 @@ import variantsexplorer.db as db
 import docker
 
 logger = logging.getLogger(__name__) 
+client = None
 
+if not client:
+    client = docker.from_env()
 
 MIME_TYPE_JSON = "application/json"
 QUEUED = 'Queued'
@@ -33,7 +36,6 @@ def execute(id):
     dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     assembly = job['assembly']
 
-    client = docker.from_env()
     CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
         --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
         --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
