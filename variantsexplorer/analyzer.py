@@ -34,14 +34,15 @@ def execute(id):
     assembly = job['assembly']
 
     client = docker.from_env()
-    lines = client.containers.run("ensemblorg/ensembl-vep", f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
+    CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
         --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
-        --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap', volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': 'rw'}}, stream=True)
+        --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
+    lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
         
     # CMD = f'docker run -t -i -v {get_volumn_param()} ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
     #     --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
     #     --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
-    # print(rel_input_filepath, out_filepath, CMD)
+    print(rel_input_filepath, out_filepath, CMD,  get_mode())
 
     # process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
     # error = ''
@@ -95,13 +96,11 @@ def parse_score_field(score):
     parts =  score.strip().split('(')
     return {'term': parts[0], 'score': float(parts[1][:-1])}
 
-def get_volumn_param():
-    cwd = os.getcwd()
-    param = f'{cwd}/vep_data:/opt/vep/.vep'
+def get_mode():
     if 'linux' in platform:
-        return param + ':Z'
+        return 'Z'
     else:
-        return param
+        return 'rw'
 class ValidationError(Exception):
     """Base class for validation exceptions"""
     pass
