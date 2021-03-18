@@ -10,6 +10,7 @@ from datetime import datetime
 from django.conf import settings
 from sys import platform
 import variantsexplorer.db as db
+import docker
 
 logger = logging.getLogger(__name__) 
 
@@ -31,15 +32,27 @@ def execute(id):
     PHENO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     assembly = job['assembly']
-    CMD = f'docker run -t -i -v {get_volumn_param()} ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
-        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
-        --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
-    print(rel_input_filepath, out_filepath, CMD)
 
-    process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
+    client = docker.from_env()
+    lines = client.containers.run("ensemblorg/ensembl-vep", f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
+        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
+        --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap', volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': 'rw'}}, stream=True)
+        
+    # CMD = f'docker run -t -i -v {get_volumn_param()} ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
+    #     --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
+    #     --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
+    # print(rel_input_filepath, out_filepath, CMD)
+
+    # process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
+    # error = ''
+    # for line in process.stdout:
+    #    error += line
+
     error = ''
-    for line in process.stdout:
-       error += line
+    for line in lines:
+        error += line
+    # for line in process.stdout:
+    #    error += line
     
     if error:
         job['error'] = error
