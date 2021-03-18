@@ -1,7 +1,7 @@
 import logging
 import os
 import uuid
-import threading
+import multiprocessing
 import subprocess
 import json
 import pandas as pd
@@ -39,12 +39,12 @@ def execute(id):
     CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
         --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
         --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
+    print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
     lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
         
     # CMD = f'docker run -t -i -v {get_volumn_param()} ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
     #     --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
     #     --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
-    print(rel_input_filepath, out_filepath, CMD,  get_mode())
 
     # process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
     # error = ''
@@ -131,7 +131,7 @@ class VariantAnalyzer:
             job['name'] = f'Analysis of {name_part} in Home Sapiens'
 
         saved_obj = db.insert(job)
-        executor = threading.Thread(target=execute, args=(saved_obj.inserted_id,))
+        executor = multiprocessing.Process(target=execute, args=(saved_obj.inserted_id,))
         executor.start()
         return saved_obj.inserted_id
 
