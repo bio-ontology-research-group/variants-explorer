@@ -31,6 +31,7 @@
     </div>
     <div class="row p-3">
         <div class="col-2 p-0 d-none d-md-block bg-light sidebar">
+            <form [formGroup]="searchForm">
             <ngb-accordion #a="ngbAccordion" activeIds="custom-panel-1,custom-panel-2">
                 <ngb-panel id="custom-panel-1">
                     <ng-template ngbPanelHeader let-opened="opened">
@@ -40,7 +41,7 @@
                     </div>
                     </ng-template>
                     <ng-template ngbPanelContent>
-                    <div *ngIf="fieldConfig && fieldConfig.Consequence" class="pb-2">
+                    <div class="form-group" *ngIf="fieldConfig">
                         <label for="consequence">Consequence</label>
                         <ng-select
                             [items]="fieldConfig.Consequence"
@@ -48,25 +49,42 @@
                             [closeOnSelect]="false"
                             bindLabel="display"
                             placeholder="Select"
+                            formControlName="Consequence"
                             (change)="onConsequenceSelect($event)"></ng-select>
                         <!--<select class="form-control-sm" color="default" (change)="onConsequenceSelect($event)" >
                             <option value="">Select</option>
                             <option *ngFor="let term of fieldConfig.Consequence" value="{{term.code}}" [selected]='consequenceFilter == term.code'>{{term.display}}</option>
                         </select>-->
                     </div>
-                     <div class="form-group">
+                     <div class="form-group" *ngIf="fieldConfig">
                         <label for="sift">SIFT Prediction</label>
-                        <select class="form-control form-control-sm" color="default" (change)="onSiftSelect($event)" *ngIf="fieldConfig && fieldConfig.SIFT">
+                        <ng-select
+                            [items]="fieldConfig.SIFT"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="display"
+                            placeholder="Select"
+                            formControlName="SIFT_object.term"
+                            (change)="onSiftSelect($event)"></ng-select>
+                        <!--<select class="form-control form-control-sm" color="default" formControlName="SIFT_object.term" (change)="onSiftSelect($event)" *ngIf="fieldConfig && fieldConfig.SIFT">
                             <option value="">Select</option>
-                            <option *ngFor="let term of fieldConfig.SIFT" value="{{term.code}}" [selected]='siftFilter == term.code'>{{term.display}}</option>
-                        </select>
+                            <option *ngFor="let term of fieldConfig.SIFT" value="{{term.code}}">{{term.display}}</option>
+                        </select> -->
                      </div>
-                     <div class="form-group">
+                     <div class="form-group"  *ngIf="fieldConfig">
                         <label for="polyphen">PolyPhen Prediction</label>
-                        <select class="form-control form-control-sm" color="default" (change)="onPolyphenSelect($event)" *ngIf="fieldConfig && fieldConfig.PolyPhen">
+                        <ng-select
+                            [items]="fieldConfig.PolyPhen"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="display"
+                            placeholder="Select"
+                            formControlName="PolyPhen_object.term"
+                            (change)="onPolyphenSelect($event)"></ng-select>
+                        <!--<select class="form-control form-control-sm" color="default" formControlName="PolyPhen_object.term" (change)="onPolyphenSelect($event)" *ngIf="fieldConfig && fieldConfig.PolyPhen">
                             <option value="">Select</option>
-                            <option *ngFor="let term of fieldConfig.PolyPhen" value="{{term.code}}" [selected]='polyphenFilter == term.code'>{{term.display}}</option>
-                        </select>
+                            <option *ngFor="let term of fieldConfig.PolyPhen" value="{{term.code}}">{{term.display}}</option>
+                        </select>-->
                      </div>
                     </ng-template>
                 </ngb-panel>
@@ -79,30 +97,30 @@
                     </ng-template>
                     <ng-template ngbPanelContent>
                      <div class="form-group">
-                        <label for="siftScore">AF Score</label>
+                        <label for="afScore">AF Score</label>
                         <div class="form-row align-items-center">
                             <div class="col-sm-4 my-1">
-                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Min" [formControl]="afMinFilter">
+                            <input type="number" class="form-control form-control-sm" min="0" max="1" step="0.01" placeholder="Min" formControlName="AFMin">
                             </div>
                             <div class="col-sm-4 my-1">
-                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Max" [formControl]="afMaxFilter">
+                            <input type="number" class="form-control form-control-sm" min="0" max="1" step="0.01" placeholder="Max" formControlName="AFMax">
                             </div>
                             <div class="col-auto my-1">
-                            <button class="btn btn-sm btn-primary" (click)="findVariantRecords();setFilters();">Go</button>
+                            <button class="btn btn-sm btn-green" (click)="setFilters();navigate();">Go</button>
                             </div>
                         </div>
                      </div>
-                     <div class="form-group">
+                     <!--<div class="form-group">
                         <label for="siftScore">SIFT Score</label>
                         <div class="form-row align-items-center">
                             <div class="col-sm-4 my-1">
-                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Min" [formControl]="siftMinFilter">
+                            <input type="number" class="form-control form-control-sm" min="0" max="1" step="0.01" placeholder="Min" formControlName="SIFT_object.scoreMin">
                             </div>
                             <div class="col-sm-4 my-1">
-                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Max" [formControl]="siftMaxFilter">
+                            <input type="number" class="form-control form-control-sm" min="0" max="1" step="0.01" placeholder="Max" formControlName="SIFT_object.scoreMax">
                             </div>
                             <div class="col-auto my-1">
-                            <button class="btn btn-sm btn-primary" (click)="findVariantRecords();setFilters();">Go</button>
+                            <button class="btn btn-sm btn-green" (click)="setFilters();">Go</button>
                             </div>
                         </div>
                      </div>
@@ -110,22 +128,29 @@
                         <label for="siftScore">PolyPhen Score</label>
                         <div class="form-row align-items-center">
                             <div class="col-sm-4 my-1">
-                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Min" [formControl]="polyPhenMinFilter">
+                            <input type="number" class="form-control form-control-sm" min="0" max="1" step="0.01" placeholder="Min" formControlName="PolyPhen_object.scoreMin">
                             </div>
                             <div class="col-sm-4 my-1">
-                            <input type="number" class="form-control form-control-sm" id="inlineFormInputName" min="0" max="1" step="0.01" placeholder="Max" [formControl]="polyPhenMaxFilter">
+                            <input type="number" class="form-control form-control-sm" min="0" max="1" step="0.01" placeholder="Max" formControlName="PolyPhen_object.scoreMax">
                             </div>
                             <div class="col-auto my-1">
-                            <button class="btn btn-sm btn-primary" (click)="findVariantRecords();setFilters();" >Go</button>
+                            <button class="btn btn-sm btn-green" (click)="setFilters();" >Go</button>
                             </div>
                         </div>
-                     </div>
+                     </div>-->
                     </ng-template>
                 </ngb-panel>
             </ngb-accordion>
+            </form>
         </div>
         <div class="col-10">
         <div class="col-12"><h5 class="font-weight-bold">Result Preview</h5></div>
+        <div class="col-12 flex-inline"><span class="chip" *ngFor="let obj of searchedTermsObjs; let outIndex = index">
+            <span *ngIf="obj.value.substring(0,2) == 'le'">{{obj.key.split(":")[0].replace("_object", "")}} {{obj.value.replace("le", "< ")}}</span>
+            <span *ngIf="obj.value.substring(0,2) == 'ge'">{{obj.key.split(":")[0].replace("_object", "")}} {{obj.value.replace("ge", "> ")}}</span>
+            <span *ngIf="obj.value.substring(0,2) != 'le' && obj.value.substring(0,2) != 'ge'">{{obj.value}}</span>
+            <a (click)="onTermRemoved(obj.key)" class="text-muted"><i class="close fas fa-times"></i></a></span>
+            <span *ngIf="searchedTermsObjs.length > 0"><a (click)="clearFilters()" class="btn btn-link btn-sm">Clear all</a></span>
         <div class="d-flex p-2">
             <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize" [rotate]="true" 
                 [maxSize]="3" (pageChange)="loadPage($event)">

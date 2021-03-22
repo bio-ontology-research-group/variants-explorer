@@ -115,3 +115,30 @@ th[sortable].desc:after {
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+.chip {
+    display: inline-block;
+    height: 32px;
+    padding: 0 12px;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 32px;
+    color: rgba(0,0,0,0.6);
+    cursor: pointer;
+    background-color: #eceff1;
+    border-radius: 16px;
+    -webkit-transition: all 0.3s linear;
+    transition: all 0.3s linear;
+}
+
+.chip .close {
+    float: right;
+    padding-left: 8px;
+    font-size: 16px;
+    line-height: 32px;
+    cursor: pointer;
+    -webkit-transition: all .1s linear;
+    transition: all .1s linear;
+}

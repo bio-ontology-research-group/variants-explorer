@@ -20,7 +20,7 @@
                 <input type="text" class="form-control form-control-sm" id="title" placeholder="Name of this job" formControlName="name">
             </div>
             <div class="form-group">
-                <label for="title">Either paste data</label>
+                <label for="title">Either paste your data</label>
                 <textarea class="form-control form-control-sm" id="exampleFormControlTextarea1" formControlName="content" rows="5"></textarea>
                 <div>
                 <ul class="list-inline mb-0">
@@ -34,7 +34,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group  col-md-6">
-                    <label for="file">or Upload File</label>
+                    <label for="file">or Upload your file</label>
                     <input type="file" #fileUpload id="fileUpload" class="form-control-file" id="file" 
                         accept=".vcf,.vcf.gz" formControlName="file" (change)="uploadFile($event.target.files)">
                     <small class="form-text text-muted">VCF file format (either in .vcf or .vcf.gz). </small>

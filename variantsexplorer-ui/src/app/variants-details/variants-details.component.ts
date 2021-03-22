@@ -3,13 +3,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { VariantsExplorerService } from '../variants-explorer.service';
 import * as _ from 'underscore';
 import { NgSelectConfig } from '@ng-select/ng-select';
-import { FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Location } from "@angular/common";
 @Component({
   selector: 'app-variants-details',
   templateUrl: './variants-details.component.html',
   styleUrls: ['./variants-details.component.css']
 })
 export class VariantsDetailsComponent implements OnInit {
+  searchForm : FormGroup;
   job = null;
   variantRecords = null;
   jobId = null;
@@ -20,46 +22,57 @@ export class VariantsDetailsComponent implements OnInit {
   previousPage = 1;
   pageSize = 20;
   collectionSize = 0;
-  consequenceFilter = [];
-  siftFilter = '';
-  polyphenFilter = '';
   queryParams = {};
-
-
-  afMinFilter = new FormControl('');
-  afMaxFilter = new FormControl('');
-  siftMinFilter = new FormControl('');
-  siftMaxFilter = new FormControl('');
-  polyPhenMinFilter = new FormControl('');
-  polyPhenMaxFilter = new FormControl('');
+  searchedTermsObjs=[];
 
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
     private router: Router,
+    public fb: FormBuilder,
+    private readonly location: Location,
     private config: NgSelectConfig) { 
-    this.config.appendTo = 'body';
+      this.config.appendTo = 'body';
+      console.log("constructing")
+      this.veSrv.getConfig().subscribe(res => {
+        this.fieldConfig = res
+        this.setFormValues();
+      });
   }
 
   ngOnInit(): void {
+    console.log("init");
+    this.searchForm = this.fb.group({
+      Consequence: [[]],
+      'SIFT_object.term': [[]],
+      'PolyPhen_object.term': [[]],
+      AFMin: [''],
+      AFMax: [''],
+      // 'SIFT_object.scoreMin': [''],
+      // 'SIFT_object.scoreMax': [''],
+      // 'PolyPhen_object.scoreMin':[''],
+      // 'PolyPhen_object.scoreMax':['']
+    });
+
     this.route.params.subscribe(params => {
       this.jobId = params.id;
       this.veSrv.getJob(params.id).subscribe(res => {
         this.job = res
       });
-      this.veSrv.getConfig().subscribe(res => {
-        this.fieldConfig = res
-      })
-      this.findVariantRecords();
+      this.findVariantRecords(); 
     });    
 
 
     this.route.queryParams.subscribe(params => {
       this.page = 1;
-      console.log(params)
       this.queryParams = Object.assign({}, params);
+      // console.log("changed params", this.queryParams)
+      this.setSearchLabels();
+      this.setFormValues();
       this.findVariantRecords();
     });
   }
+
+  get f() { return this.searchForm.controls }
 
   loadPage(page: number) {
     if (page !== this.previousPage) {
@@ -90,46 +103,121 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   onSiftSelect(event) {
-    this.queryParams['SIFT_object.term'] = event.target.value;
-    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
+    this.setFilters();
+    this.navigate();
   }
   
   onConsequenceSelect(event) {
-    this.queryParams['Consequence'] = _.map(event, obj => obj.code);
-    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
+    this.setFilters();
+    this.navigate();
   }
 
   onPolyphenSelect(event) {
-    console.log( event.target.value, this.queryParams)
-    this.queryParams['PolyPhen_object.term'] = event.target.value;
-    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
+    this.setFilters();
+    this.navigate();
   }
 
   setFilters() {
-    this.queryParams['AF'] = []
-    if (this.afMinFilter.value) { 
-      this.queryParams['AF'].push('ge' + this.afMinFilter.value)
-    }
-    if (this.afMaxFilter.value) { 
-      this.queryParams['AF'].push('le' + this.afMaxFilter.value)
-    }
+    this.queryParams = {};
+    Object.keys(this.f).forEach(key => {
+      if (this.f[key].value) {
+        if (key.includes('Min') || key.includes('Max')) {
+          let param = key.substring(0, key.length-3);
+          let val = key.includes('Min') ? 'ge' + this.f[key].value : 'le' + this.f[key].value;
+          if (this.queryParams[param] && this.queryParams[param].length > 0) {
+            this.queryParams[param].push(val)
+          } else { 
+            this.queryParams[param] = [val]
+          }
 
-    this.queryParams['SIFT_object.score'] = []
-    if (this.siftMinFilter.value) { 
-      this.queryParams['SIFT_object.score'].push('ge' + this.siftMinFilter.value)
-    }
-    if (this.siftMaxFilter.value) { 
-      this.queryParams['SIFT_object.score'].push('le' + this.siftMaxFilter.value)
-    }
+        } else if (Array.isArray(this.f[key].value)) {
+          this.queryParams[key] = _.map(this.f[key].value, obj => obj.code);
+        } else {
+          this.queryParams[key] = this.f[key].value
+        }
+      } 
+    });
+  }
 
-    this.queryParams['PolyPhen_object.score'] = []
-    if (this.polyPhenMinFilter.value) { 
-      this.queryParams['PolyPhen_object.score'].push('ge' + this.polyPhenMinFilter.value)
+  onTermRemoved(key) {
+    let params = Object.assign({}, this.queryParams);
+    if (key.includes(":")) {
+      let keyPart = key.split(":")[0]
+      if (params[keyPart].length > 1) {
+        var index = params[keyPart].indexOf(key.split(":")[1]);
+        if (index !== -1) {
+          params[keyPart].splice(index, 1);
+        }
+      } else {
+        delete params[keyPart];
+      }
+    } else {
+      delete params[key];
     }
-    if (this.polyPhenMaxFilter.value) { 
-      this.queryParams['PolyPhen_object.score'].push('le' + this.polyPhenMaxFilter.value)
+    this.queryParams = params;
+    this.navigate();
+  }
+
+  clearFilters() {
+    this.queryParams={};
+    this.searchedTermsObjs=[];
+    this.navigate();
+  }
+
+  setFormValues(){
+    let formVal = {
+      Consequence: [],
+      'SIFT_object.term': [],
+      'PolyPhen_object.term': [],
+      AFMin: '',
+      AFMax: '',
+    };
+    Object.keys(this.queryParams).forEach(val => {
+      if (Array.isArray(this.queryParams[val])) {
+        this.queryParams[val].forEach(item => {
+          this.setValue(val, item, formVal);
+        });
+      } else {
+        this.setValue(val, this.queryParams[val], formVal);
+      }
+    });
+    // console.log(this.queryParams,formVal)
+    this.searchForm.setValue(formVal);
+  }
+
+  setValue(key, value, formObj){
+    if (value.substring(0,2) == 'le') {
+      formObj[key + 'Max'] = value.substring(2, value.length);
+    } else if (value.substring(0,2) == 'ge') {
+      formObj[key + 'Min'] = value.substring(2, value.length);
+    } else {
+      if (this.fieldConfig && this.fieldConfig[key.split('_')[0]]) {
+        let codeObj = _.findWhere(this.fieldConfig[key.split('_')[0]], {"code" : value});
+        formObj[key].push(codeObj ? codeObj:value);
+      }
     }
-    this.router.navigate(['/job', this.jobId], { queryParams: this.queryParams});
+  }
+
+  setSearchLabels() {
+    this.searchedTermsObjs = [];
+    Object.keys(this.queryParams).forEach(val => {
+      if (Array.isArray(this.queryParams[val])) {
+        this.queryParams[val].forEach(item => {
+          this.searchedTermsObjs.push({'key':val + ":" + item, 'value':item});
+        });
+      } else {
+        this.searchedTermsObjs.push({'key':val, 'value':this.queryParams[val]});
+      }
+    });
+  }
+
+
+  navigate() {
+    this.setFormValues();
+    const urlTree = this.router.createUrlTree([], {relativeTo:this.route, queryParams: this.queryParams});
+    this.location.go(urlTree.toString()); 
+    this.findVariantRecords();
+    this.setSearchLabels();
   }
 
 }
