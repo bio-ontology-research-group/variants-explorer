@@ -24,6 +24,7 @@ export class VariantsDetailsComponent implements OnInit {
   collectionSize = 0;
   queryParams = {};
   searchedTermsObjs=[];
+  selectedColumns = [];
 
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
@@ -32,10 +33,10 @@ export class VariantsDetailsComponent implements OnInit {
     private readonly location: Location,
     private config: NgSelectConfig) { 
       this.config.appendTo = 'body';
-      console.log("constructing")
       this.veSrv.getConfig().subscribe(res => {
         this.fieldConfig = res
         this.setFormValues();
+        this.selectedColumns = _.filter(this.fieldConfig.headers, items => items.hide == false);
       });
   }
 
@@ -110,7 +111,7 @@ export class VariantsDetailsComponent implements OnInit {
   onConsequenceSelect(event) {
     this.setFilters();
     this.navigate();
-  }
+  }  
 
   onPolyphenSelect(event) {
     this.setFilters();
@@ -211,6 +212,10 @@ export class VariantsDetailsComponent implements OnInit {
     });
   }
 
+  onHeadersSelect(event) {
+    console.log(this.selectedColumns);
+    
+  }
 
   navigate() {
     this.setFormValues();

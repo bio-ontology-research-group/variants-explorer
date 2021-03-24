@@ -33,11 +33,11 @@ def execute(id):
     rel_out_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, out_filepath)
     GO_ANNO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.go.bed.gz')
     PHENO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
-    dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
+    # dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
     assembly = job['assembly']
 
     CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
-        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
+        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --tsl --numbers  --check_existing --hgvs --biotype --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
         --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
     print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
     lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
@@ -63,7 +63,7 @@ def execute(id):
     else:
         job['output_filepath'] = os.path.join(settings.DATA_DIR, out_filepath)
         job['status'] = DONE
-        df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=70)
+        df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=74)
         print(df.head())
         records =  df.to_dict('records')
         save_records(records, job)

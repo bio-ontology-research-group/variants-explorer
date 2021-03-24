@@ -76,6 +76,7 @@
                         <ng-select
                             [items]="fieldConfig.PolyPhen"
                             [multiple]="true"
+                            [hideSelected]="true"
                             [closeOnSelect]="false"
                             bindLabel="display"
                             placeholder="Select"
@@ -161,62 +162,62 @@
                 <option [ngValue]="50">50 items per page</option>
             </select>
         </div>
-        <table class="table table-sm table-striped table-responsive">
+        <div class="col-12 p-2 bg-filter">
+        <div class="form-inline" *ngIf="fieldConfig">
+            <ng-select
+                [items]="fieldConfig.headers"
+                [multiple]="true"
+                [closeOnSelect]="false"
+                bindLabel="display"
+                placeholder="Select"
+                [(ngModel)]="selectedColumns"
+                (change)="onHeadersSelect($event)">
+                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                    <div class="ng-value">
+                        <span class="ng-value-label">Show/Hide columns ({{fieldConfig.headers.length - items.length}} hidden)</span>
+                    </div>
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                    <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> {{item.display}}
+                </ng-template>
+            </ng-select>
+        </div>
+        </div>
+        <table class="table table-sm table-striped table-responsive" *ngIf="fieldConfig">
         <thead class="thead-light">
             <tr>
-            <th scope="col">Uploaded Variant</th>
-            <th scope="col">Location</th>
-            <th scope="col">Allele</th>
-            <th scope="col">Consequence</th>
-            <th scope="col">Symbol</th>
-            <th scope="col">Gene</th>
-            <th scope="col">Feature type</th>
-            <th scope="col">Feature</th>														
-            <th scope="col">cDNA_position</th>
-            <th scope="col">CDS_position</th>
-            <th scope="col">Protein_position</th>
-            <th scope="col">Amino_acids</th>
-            <th scope="col">Codons</th>
-            <th scope="col">Existing_variation</th>
-            <th scope="col">IMPACT</th>
-            <th scope="col">DISTANCE</th>
-            <th scope="col">STRAND</th>
-            <th scope="col">FLAGS</th>
-            <th scope="col">SYMBOL</th>
-            <th scope="col">SYMBOL_SOURCE</th>
-            <th scope="col">HGNC_ID</th>
-            <th scope="col">ENSP</th>
-            <th scope="col">SWISSPROT</th>
-            <th scope="col">TREMBL</th>
-            <th scope="col">UNIPARC</th>
-            <th scope="col">UNIPROT_ISOFORM</th>
-            <th scope="col">SOURCE</th>
-            <th scope="col">SIFT</th>
-            <th scope="col">PolyPhen</th>
-            <th scope="col">HGVSc</th>
-            <th scope="col">HGVSp</th>
-            <th scope="col">HGVS_OFFSET</th>
-            <th scope="col">AF</th>
-            <th scope="col">gnomAD_AF</th>
-            <th scope="col">gnomAD_AFR_AF</th>
-            <th scope="col">gnomAD_AMR_AF</th>
-            <th scope="col">gnomAD_ASJ_AF</th>
-            <th scope="col">gnomAD_EAS_AF</th>
-            <th scope="col">gnomAD_FIN_AF</th>
-            <th scope="col">gnomAD_NFE_AF</th>
-            <th scope="col">gnomAD_OTH_AF</th>
-            <th scope="col">gnomAD_SAS_AF</th>
-            <th scope="col">CLIN_SIG</th>
-            <th scope="col">SOMATIC</th>
-            <th scope="col">PUBMED</th>
-            <th scope="col">PHENO</th>
-            <th scope="col">GO_CLASSES</th>
-            <th scope="col">PHENOTYPE</th>
+            <th scope="col" *ngFor="let column of selectedColumns; let colIndex = index" >
+                 <span [ngbTooltip]="column.description">{{column.display}}</span>
+            </th>            
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let entry of variantRecords; let outIndex = index">
-                <th scope="row">{{entry['#Uploaded_variation']}}</th>
+                <td *ngFor="let column of selectedColumns; let colIndex = index">
+                    <span *ngIf="!['Consequence', 'Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES'].includes(column.code)">{{entry[column.code]}}</span>
+                    <span *ngIf="column.code == 'Gene'"><a [href]="'https://asia.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + entry[column.code]" target="_blank">{{entry[column.code]}}</a></span>
+                    <span *ngIf="column.code == 'SIFT'">
+                        <span *ngIf="entry.SIFT_object"><span class="badge badge-lg" [ngbTooltip]="entry.SIFT_object.term" [ngClass]="{'badge-success': entry.SIFT_object.term == 'tolerated', 'badge-danger': entry.SIFT_object.term == 'deleterious'}">{{entry.SIFT_object.score}}</span></span>
+                        <span *ngIf="!entry.SIFT_object">{{entry.SIFT}}</span>
+                    </span>
+                    <span *ngIf="column.code == 'PolyPhen'">
+                        <span *ngIf="entry.PolyPhen_object">
+                            <span class="badge badge-lg" [ngbTooltip]="entry.PolyPhen_object.term" [ngClass]="{'badge-primary': entry.PolyPhen_object.term == 'unknown', 'badge-success': entry.PolyPhen_object.term == 'benign', 'badge-warning': entry.PolyPhen_object.term == 'possibly_damaging', 'badge-danger': entry.PolyPhen_object.term == 'probably_damaging'}">
+                            {{entry.PolyPhen_object.score}}</span>
+                        </span>
+                        <span *ngIf="!entry.PolyPhen_object">{{entry.PolyPhen}}</span>
+                    </span>
+                    <span *ngIf="column.code == 'GO_CLASSES'">{{entry[column.code].split('__').join()}}</span>
+                    <span *ngIf="column.code == 'PUBMED'">
+                        <span *ngIf="entry[column.code] != '-'">
+                            <ul class="list-unstyled">
+                                <li *ngFor="let pubmedId of  entry[column.code].split(',')"><a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PUBMED:{{pubmedId}}</a></li>
+                            </ul>
+                        </span>
+                        <span *ngIf="entry[column.code] == '-'">{{entry[column.code]}}</span>
+                    </span>
+                </td>
+                <!--<th scope="row">{{entry['#Uploaded_variation']}}</th>
                 <td>{{entry.Location}}</td>
                 <td>{{entry.Allele}}</td>
                 <td>{{entry.Consequence}}</td>
@@ -270,7 +271,7 @@
                 <td>{{entry.PHENO}}</td>
                 <td>{{entry.PUBMED}}</td>
                 <td>{{entry.GO_CLASSES.split('__').join()}}</td>
-                <td>{{entry.PHENOTYPE}}</td>
+                <td>{{entry.PHENOTYPE}}</td> -->
             </tr>
         </tbody>
         </table>

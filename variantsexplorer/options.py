@@ -46,5 +46,259 @@ FIELD_OPTIONS = {
         { "code" : "regulatory_region_variant", "display": "Regulatory region variant", "description":"", "class":"SO:0001566", "ontology": "SO"},
         { "code" : "feature_truncation", "display": "Feature truncation", "description":"", "class":"SO:0001906", "ontology": "SO"},
         { "code" : "intergenic_variant", "display": "Intergenic variant", "description":"", "class":"SO:0001628", "ontology": "SO"}
+    ],
+    "headers" : [
+        { 
+            "code": "#Uploaded_variation", 
+            "display": "Uploaded Variant", 
+            "description":"Identifier of uploaded variant", 
+            "hide": False },
+        { 
+            "code": "Location", 
+            "display": "Location", 
+            "description":"Location of variant in standard coordinate format (chr:start or chr:start-end)", 
+            "hide": False },
+        { 
+            "code": "Allele", 
+            "display": "Allele", 
+            "description":"The variant allele used to calculate the consequence", 
+            "hide": False },
+        { 
+            "code": "Consequence", 
+            "display": "Consequence", 
+            "description":"Consequence type", 
+            "hide": False },
+        { 
+            "code": "IMPACT", 
+            "display": "Impact", 
+            "description":"Subjective impact classification of consequence type", 
+            "hide": True },
+        { 
+            "code": "SYMBOL", 
+            "display": "Symbol", 
+            "description":"Gene symbol (e.g. HGNC)", 
+            "hide": False },
+        { 
+            "code": "Gene", "display": 
+            "Gene", "description":"Stable ID of affected gene", 
+            "hide": False },
+        { 
+            "code": "Feature", 
+            "display": "Feature", 
+            "description":"Stable ID of feature", 
+            "hide": False },
+        { 
+            "code": "Feature_type", 
+            "display": "Feature type", 
+            "description":"Type of feature - Transcript, RegulatoryFeature or MotifFeature",
+             "hide": False },
+        { 
+            "code": "BIOTYPE", 
+            "display": "Biotype", 
+            "description":"Stable ID of featureFeature	Biotype of transcript or regulatory feature",
+             "hide": False },
+        { 
+            "code": "TSL", 
+            "display": "Transcript support level", 
+            "description":"Transcript support level",
+            "hide": True },
+        { 
+            "code": "Exon", 
+            "display": "Exon", 
+            "description":"Exon number(s) / total",
+             "hide": False },
+        { 
+            "code": "Intron", 
+            "display": "Intron", 
+            "description":"Intron number(s) / total",
+             "hide": True },
+        { 
+            "code": "cDNA_position", 
+            "display": "cDNA position", 
+            "description":"Relative position of base pair in cDNA sequence", 
+            "hide": False },
+        { 
+            "code": "CDS_position", 
+            "display": "CDS position", 
+            "description":"Relative position of base pair in coding sequence", 
+            "hide": False },
+        { 
+            "code": "Protein_position", 
+            "display": "Protein position", 
+            "description":"Relative position of amino acid in protein", 
+            "hide": False },
+        { 
+            "code": "Amino_acids", 
+            "display": "Amino acids", 
+            "description":"Reference and variant amino acids",
+             "hide": False },
+        { 
+            "code": "Codons", 
+            "display": "Codons", 
+            "description":"Reference and variant codon sequence", 
+            "hide": False },
+        { 
+            "code": "Existing_variation", 
+            "display": "Existing variant", 
+            "description":"Identifier(s) of co-located known variants", 
+            "hide": True },
+        { 
+            "code": "DISTANCE", 
+            "display": "Distance to transcript", 
+            "description":"Shortest distance from variant to transcript", 
+            "hide": True },
+        { 
+            "code": "Feature_strand", 
+            "display": "Feature strand", 
+            "description":"Strand of the feature (1/-1)", 
+            "hide": False },
+        { 
+            "code": "FLAGS", 
+            "display": "FLAGS", 
+            "description":"Transcript quality flags", 
+            "hide": True },
+        { 
+            "code": "SYMBOL_SOURCE", 
+            "display": "Symbol source", 
+            "description":"Source of gene symbol", 
+            "hide": True },
+        { 
+            "code": "HGNC_ID", 
+            "display": "HGNC ID", 
+            "description":"Stable identifer of HGNC gene symbol", 
+            "hide": True },
+        { 
+            "code": "SWISSPROT", 
+            "display": "SWISSPROT", 
+            "description":"UniProtKB/Swiss-Prot accession", 
+            "hide": True },
+        { 
+            "code": "TREMBL", 
+            "display": "TREMBL", 
+            "description":"UniProtKB/TrEMBL accession", 
+            "hide": True },
+        { 
+            "code": "UNIPARC", 
+            "display": "UNIPARC", 
+            "description":"UniParc accession", 
+            "hide": True },
+        { 
+            "code": "UNIPROT_ISOFORM", 
+            "display": "UNIPROT ISOFORM", 
+            "description":"Direct mappings to UniProtKB isoforms", 
+            "hide": True },
+        { 
+            "code": "SOURCE", 
+            "display": "Source", 
+            "description":"", 
+            "hide": True },
+        { 
+            "code": "SIFT", 
+            "display": "SIFT", 
+            "description":"SIFT prediction and/or score", 
+            "hide": False },
+        { 
+            "code": "PolyPhen",  
+            "display": "PolyPhen", 
+            "description":"PolyPhen prediction and/or score", 
+            "hide": False},
+        { 
+            "code": "HGVSc",  
+            "display": "HGVSc", 
+            "description":"HGVS coding sequence name", 
+            "hide": True},
+        { 
+            "code": "HGVSp",  
+            "display": "HGVSp", 
+            "description":"HGVS protein sequence name", 
+            "hide": True },
+        { 
+            "code": "HGVS_OFFSET",  
+            "display": "HGVS Offset", 
+            "description":"", 
+            "hide": True },
+        { 
+            "code": "AF",  
+            "display": "AF", 
+            "description":"Frequency of existing variant in 1000 Genomes combined population", 
+            "hide": False 
+            },
+        { 
+            "code": "gnomAD_AF",  
+            "display": "gnomAD AF", 
+            "description":"Frequency of existing variant in gnomAD exomes combined population", 
+            "hide": True
+        },
+        { 
+            "code": "gnomAD_AFR_AF",  
+            "display": "gnomAD AFR AF", 
+            "description":"Frequency of existing variant in gnomAD exomes African/American population", 
+            "hide": True},
+        { 
+            "code": "gnomAD_AMR_AF",  
+            "display": "gnomAD AMR AF", 
+            "description":"Frequency of existing variant in gnomAD exomes American population", 
+            "hide": True},
+        { 
+            "code": "gnomAD_ASJ_AF",  
+            "display": "gnomAD ASJ AF", 
+            "description":"Frequency of existing variant in gnomAD exomes Ashkenazi Jewish population", 
+            "hide": True},
+        { 
+            "code": 
+            "gnomAD_EAS_AF",  
+            "display": "gnomAD EAS AF", 
+            "description":"Frequency of existing variant in gnomAD exomes East Asian population", 
+            "hide": True },
+        { 
+            "code": "gnomAD_FIN_AF",  
+            "display": "gnomAD FIN AF", 
+            "description":"Frequency of existing variant in gnomAD exomes Finnish population", 
+            "hide": True },
+        { 
+            "code": "gnomAD_NFE_AF",  
+            "display": "gnomAD NFE AF", 
+            "description":"Frequency of existing variant in gnomAD exomes Non-Finnish European population", 
+            "hide": True },
+        { 
+            "code": "gnomAD_OTH_AF",  
+            "display": "gnomAD OTH AF", 
+            "description":"Frequency of existing variant in gnomAD exomes other combined populations", 
+            "hide": True },
+        { 
+            "code": "gnomAD_SAS_AF",  
+            "display": "gnomAD SAS AF",
+            "description":"Frequency of existing variant in gnomAD exomes South Asian population", 
+            "hide": True },
+        { 
+            "code": "CLIN_SIG",  
+            "display": "Clinical significance", 
+            "description":"ClinVar clinical significance of the dbSNP variant", 
+            "hide": True },
+        { 
+            "code": "SOMATIC",  
+            "display": "Somatic status", 
+            "description":"Somatic status of existing variant", 
+            "hide": True },
+        { 
+            "code": "PHENO",  
+            "display": "Phenotype or disease", 
+            "description":"Indicates if existing variant(s) is associated with a phenotype, disease or trait; multiple values correspond to multiple variants", 
+            "hide": True },
+        { 
+            "code": "PUBMED",  
+            "display": "Pubmed", 
+            "description":"Pubmed ID(s) of publications that cite existing variant", 
+            "hide": False },
+        { 
+            "code": "GO_CLASSES",  
+            "display": "Protein Functions", 
+            "description":"Custom protein function annotations from GO", 
+            "hide": False},
+        { 
+            "code": "PHENOTYPE", 
+            "display": "Phenotype Annotation", 
+            "description":"Custom phenotype annotations from HPO", 
+            "hide": False }
     ]
 }
