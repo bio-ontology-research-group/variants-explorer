@@ -51,10 +51,6 @@
                             placeholder="Select"
                             formControlName="Consequence"
                             (change)="onConsequenceSelect($event)"></ng-select>
-                        <!--<select class="form-control-sm" color="default" (change)="onConsequenceSelect($event)" >
-                            <option value="">Select</option>
-                            <option *ngFor="let term of fieldConfig.Consequence" value="{{term.code}}" [selected]='consequenceFilter == term.code'>{{term.display}}</option>
-                        </select>-->
                     </div>
                      <div class="form-group" *ngIf="fieldConfig">
                         <label for="sift">SIFT Prediction</label>
@@ -66,10 +62,6 @@
                             placeholder="Select"
                             formControlName="SIFT_object.term"
                             (change)="onSiftSelect($event)"></ng-select>
-                        <!--<select class="form-control form-control-sm" color="default" formControlName="SIFT_object.term" (change)="onSiftSelect($event)" *ngIf="fieldConfig && fieldConfig.SIFT">
-                            <option value="">Select</option>
-                            <option *ngFor="let term of fieldConfig.SIFT" value="{{term.code}}">{{term.display}}</option>
-                        </select> -->
                      </div>
                      <div class="form-group"  *ngIf="fieldConfig">
                         <label for="polyphen">PolyPhen Prediction</label>
@@ -186,7 +178,7 @@
         <table class="table table-sm table-striped table-responsive" *ngIf="fieldConfig">
         <thead class="thead-light">
             <tr>
-            <th scope="col" *ngFor="let column of selectedColumns; let colIndex = index" >
+            <th scope="col" *ngFor="let column of selectedColumns; let colIndex = index" [attr.sortable]="column.code" sortable="{{column.code}}"  (sort)="onSort($event)">
                  <span [ngbTooltip]="column.description">{{column.display}}</span>
             </th>            
             </tr>
@@ -194,7 +186,7 @@
         <tbody>
             <tr *ngFor="let entry of variantRecords; let outIndex = index">
                 <td *ngFor="let column of selectedColumns; let colIndex = index">
-                    <span *ngIf="!['Consequence', 'Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES'].includes(column.code)">{{entry[column.code]}}</span>
+                    <span *ngIf="!['Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES'].includes(column.code)">{{entry[column.code]}}</span>
                     <span *ngIf="column.code == 'Gene'"><a [href]="'https://asia.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + entry[column.code]" target="_blank">{{entry[column.code]}}</a></span>
                     <span *ngIf="column.code == 'SIFT'">
                         <span *ngIf="entry.SIFT_object"><span class="badge badge-lg" [ngbTooltip]="entry.SIFT_object.term" [ngClass]="{'badge-success': entry.SIFT_object.term == 'tolerated', 'badge-danger': entry.SIFT_object.term == 'deleterious'}">{{entry.SIFT_object.score}}</span></span>
@@ -211,7 +203,7 @@
                     <span *ngIf="column.code == 'PUBMED'">
                         <span *ngIf="entry[column.code] != '-'">
                             <ul class="list-unstyled">
-                                <li *ngFor="let pubmedId of  entry[column.code].split(',')"><a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PUBMED:{{pubmedId}}</a></li>
+                                <li *ngFor="let pubmedId of  entry[column.code].split(',')"><a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PMID:{{pubmedId}}</a></li>
                             </ul>
                         </span>
                         <span *ngIf="entry[column.code] == '-'">{{entry[column.code]}}</span>

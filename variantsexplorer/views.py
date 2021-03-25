@@ -95,8 +95,9 @@ class RecordsView(APIView):
         try:
             limit = request.GET.get('limit', None)
             offset = request.GET.get('offset', None)
+            orderby = request.GET.get('orderby', None)
             query_params = request.GET.dict().copy()
-            result = self.service.find_records(jobid, query_params, int(limit), int(offset))
+            result = self.service.find_records(jobid, query_params, int(limit), int(offset), orderby)
             return Response(result)
         except Exception as e:
             logger.exception("message")

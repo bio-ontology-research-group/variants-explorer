@@ -12,6 +12,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { VariantsExplorerService } from './variants-explorer.service';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NgbdSortableHeader } from './sortable.directive';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,9 @@ import { NgSelectModule } from '@ng-select/ng-select';
     HelpComponent,
     HomeComponent,
     UploadFormComponent,
-    VariantsDetailsComponent
+    VariantsDetailsComponent,
+    NgbdSortableHeader
+    
   ],
   imports: [
     BrowserModule,

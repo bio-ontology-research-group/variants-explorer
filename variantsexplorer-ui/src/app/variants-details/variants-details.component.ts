@@ -1,16 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, Directive, EventEmitter, ViewChildren, QueryList, SimpleChange} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VariantsExplorerService } from '../variants-explorer.service';
 import * as _ from 'underscore';
 import { NgSelectConfig } from '@ng-select/ng-select';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Location } from "@angular/common";
+import { NgbdSortableHeader, SortEvent } from '../sortable.directive';
 @Component({
   selector: 'app-variants-details',
   templateUrl: './variants-details.component.html',
   styleUrls: ['./variants-details.component.css']
 })
 export class VariantsDetailsComponent implements OnInit {
+  @ViewChildren(NgbdSortableHeader) sortHeaders: QueryList<NgbdSortableHeader>;
+
+  orderBy = '';
   searchForm : FormGroup;
   job = null;
   variantRecords = null;
@@ -48,10 +52,6 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [[]],
       AFMin: [''],
       AFMax: [''],
-      // 'SIFT_object.scoreMin': [''],
-      // 'SIFT_object.scoreMax': [''],
-      // 'PolyPhen_object.scoreMin':[''],
-      // 'PolyPhen_object.scoreMax':['']
     });
 
     this.route.params.subscribe(params => {
@@ -96,6 +96,7 @@ export class VariantsDetailsComponent implements OnInit {
     let filter = Object.assign({}, this.queryParams)
     filter['limit'] = this.pageSize;
     filter['offset'] = offset;
+    filter['orderby'] = this.orderBy;
     this.veSrv.findRecords(this.jobId, filter).subscribe(res => {
       this.variantRecords = res['data'] && res['data'].length > 1 ? res['data'] : []; 
       this.collectionSize = res['total'];
@@ -215,6 +216,23 @@ export class VariantsDetailsComponent implements OnInit {
   onHeadersSelect(event) {
     console.log(this.selectedColumns);
     
+  }
+
+  onSort({column, direction}: SortEvent) {
+    // resetting other headers
+    this.sortHeaders.forEach(header => {
+      if (header.sortable !== column) {
+        header.direction = '';
+      }
+    });
+
+    // sorting countries
+    if (direction === '' || column === '') {
+      this.orderBy = '';
+    } else {
+      this.orderBy = column + ":" + direction;
+    }
+    this.findVariantRecords()
   }
 
   navigate() {

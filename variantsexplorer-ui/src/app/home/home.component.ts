@@ -6,36 +6,8 @@ import { toJSDate } from '@ng-bootstrap/ng-bootstrap/datepicker/ngb-calendar';
 import { of } from 'rxjs';  
 import { interval } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators'; 
+import { NgbdSortableHeader, SortEvent } from '../sortable.directive';
 import { VariantsExplorerService } from '../variants-explorer.service';
-
-export type SortColumn = 'name' | 'submitted_at' | 'status' | '';
-export type SortDirection = 'asc' | 'desc' | '';
-const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
-
-export interface SortEvent {
-  column: SortColumn;
-  direction: SortDirection;
-}
-
-@Directive({
-  selector: 'th[sortable]',
-  host: {
-    '[class.asc]': 'direction === "asc"',
-    '[class.desc]': 'direction === "desc"',
-    '(click)': 'rotate()'
-  }
-})
-export class ListJobSortableHeader {
-
-  @Input() sortable: SortColumn = '';
-  @Input() direction: SortDirection = '';
-  @Output() sort = new EventEmitter<SortEvent>();
-
-  rotate() {
-    this.direction = rotate[this.direction];
-    this.sort.emit({column: this.sortable, direction: this.direction});
-  }
-}
 
 const compare = (v1: string | number, v2: string | number) => v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
 
@@ -45,7 +17,7 @@ const compare = (v1: string | number, v2: string | number) => v1 < v2 ? -1 : v1 
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  @ViewChildren(ListJobSortableHeader) headers: QueryList<ListJobSortableHeader>;
+  @ViewChildren(NgbdSortableHeader) headers: QueryList<NgbdSortableHeader>;
 
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef;
   file = null;
@@ -215,8 +187,8 @@ ENST00000003084:c.1431_1433delTTC`)
 
 
   get jobPage(): Object[] {
-    this.collectionSize = this.jobs ? this.jobs.length : 0;
-    return this.jobs ? this.jobs
+    this.collectionSize = this.jobsFiltered ? this.jobsFiltered.length : 0;
+    return this.jobsFiltered ? this.jobsFiltered
       .map((concept, i) => ({id: i + 1, ...concept}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) : []; 
   }

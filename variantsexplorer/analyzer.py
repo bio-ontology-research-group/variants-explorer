@@ -147,9 +147,10 @@ class VariantAnalyzer:
             obj['output_filepath'] = None
         return obj
 
-    def find_records(self, job_id, filter, limit=10, offset=None ):
+    def find_records(self, job_id, filter, limit=10, offset=None, orderby=None):
         del filter['limit']
         del filter['offset']
+        del filter['orderby']
         clone = filter.copy()
         for key in clone:
             if ',' in clone[key]:
@@ -157,7 +158,7 @@ class VariantAnalyzer:
 
             if not clone[key].strip():
                del filter[key]
-        return db.find_records(job_id, filter, limit, offset)
+        return db.find_records(job_id, filter, limit, offset, orderby)
 
     def delete(self, id):
         job = db.get(id)

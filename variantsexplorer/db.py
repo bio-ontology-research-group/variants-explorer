@@ -48,7 +48,7 @@ def get(id):
   col = db.jobs_col
   return col.find_one({"_id": ObjectId(str(id))})
 
-def find_records(job_id, filter, limit=None, offset=None):
+def find_records(job_id, filter, limit=None, offset=None, orderby=None) :
   col = db.records_col
   filter['job_id'] = job_id
 
@@ -79,9 +79,18 @@ def find_records(job_id, filter, limit=None, offset=None):
       elif 'ge' == filter[key][:2]:
         filter[key] = {'$gte': float(filter[key][2:])}
 
-  print(filter)
-
-  data = list(col.find(filter, limit=limit, skip=offset))
+  print(filter, orderby)
+  
+  data = []
+  if orderby: 
+    orderby_parts = orderby.split(':')
+    (property, direction) = (orderby_parts[0], orderby_parts[1])
+    direction = 1 if direction == "asc" else -1 
+    data = col.find(filter, limit=limit, skip=offset).sort(property, direction)
+  else:
+    data = col.find(filter, limit=limit, skip=offset)
+  
+  data = list(data)
   for obj in data:
       obj['_id']=str(obj['_id'])
   count = col.count_documents(filter)
