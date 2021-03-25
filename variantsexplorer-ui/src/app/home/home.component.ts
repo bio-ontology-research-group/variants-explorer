@@ -133,6 +133,7 @@ export class HomeComponent implements OnInit {
     this.isCollapsed = true;
     this.uploadForm.reset();
     this.f.assembly.setValue(this.GRCh38);
+    this.file = null;
   }
 
   findJobs(){
