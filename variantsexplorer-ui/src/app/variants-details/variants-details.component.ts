@@ -45,7 +45,6 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("init");
     this.searchForm = this.fb.group({
       Consequence: [[]],
       'SIFT_object.term': [[]],
@@ -236,6 +235,7 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   navigate() {
+    this.page = 1;
     this.setFormValues();
     const urlTree = this.router.createUrlTree([], {relativeTo:this.route, queryParams: this.queryParams});
     this.location.go(urlTree.toString()); 
