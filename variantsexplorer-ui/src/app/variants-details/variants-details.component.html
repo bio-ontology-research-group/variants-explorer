@@ -186,7 +186,7 @@
         <tbody>
             <tr *ngFor="let entry of variantRecords; let outIndex = index">
                 <td *ngFor="let column of selectedColumns; let colIndex = index">
-                    <span *ngIf="!['Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES'].includes(column.code)">{{entry[column.code]}}</span>
+                    <span *ngIf="!['Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES', 'SWISSPROT','TREMBL', 'UNIPROT_ISOFORM', 'UNIPARC'].includes(column.code)">{{entry[column.code]}}</span>
                     <span *ngIf="column.code == 'Gene'"><a [href]="'https://asia.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + entry[column.code]" target="_blank">{{entry[column.code]}}</a></span>
                     <span *ngIf="column.code == 'SIFT'">
                         <span *ngIf="entry.SIFT_object"><span class="badge badge-lg" [ngbTooltip]="entry.SIFT_object.term" [ngClass]="{'badge-success': entry.SIFT_object.term == 'tolerated', 'badge-danger': entry.SIFT_object.term == 'deleterious'}">{{entry.SIFT_object.score}}</span></span>
@@ -208,62 +208,9 @@
                         </span>
                         <span *ngIf="entry[column.code] == '-'">{{entry[column.code]}}</span>
                     </span>
+                    <span *ngIf="column.code == 'SWISSPROT' || column.code == 'TREMBL' || column.code == 'UNIPROT_ISOFORM'"><a [href]="'https://www.uniprot.org/uniprot/' + entry[column.code].split('.')[0]" target="_blank">{{entry[column.code].split('.')[0]}}</a></span>
+                    <span *ngIf="column.code == 'UNIPARC'"><a [href]="'https://www.uniprot.org/uniparc/' + entry[column.code]" target="_blank">{{entry[column.code]}}</a></span>
                 </td>
-                <!--<th scope="row">{{entry['#Uploaded_variation']}}</th>
-                <td>{{entry.Location}}</td>
-                <td>{{entry.Allele}}</td>
-                <td>{{entry.Consequence}}</td>
-                <td>{{entry.SYMBOL}}</td>
-                <td><a [href]="'https://asia.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + entry.Gene" target="_blank">{{entry.Gene}}</a></td>
-                <td>{{entry.Feature_type}}</td>
-                <td>{{entry.Feature}}</td>														
-                <td>{{entry.cDNA_position}}</td>
-                <td>{{entry.CDS_position}}</td>
-                <td>{{entry.Protein_position}}</td>
-                <td>{{entry.Amino_acids}}</td>
-                <td>{{entry.Codons}}</td>
-                <td>{{entry.Existing_variation}}</td>
-                <td>{{entry.IMPACT}}</td>
-                <td>{{entry.DISTANCE}}</td>
-                <td>{{entry.STRAND}}</td>
-                <td>{{entry.FLAGS}}</td>
-                <td>{{entry.SYMBOL}}</td>
-                <td>{{entry.SYMBOL_SOURCE}}</td>
-                <td>{{entry.HGNC_ID}}</td>
-                <td>{{entry.ENSP}}</td>
-                <td>{{entry.SWISSPROT}}</td>
-                <td>{{entry.TREMBL}}</td>
-                <td>{{entry.UNIPARC}}</td>
-                <td>{{entry.UNIPROT_ISOFORM}}</td>
-                <td>{{entry.SOURCE}}</td>
-                <td>
-                    <span *ngIf="entry.SIFT_object"><span class="badge badge-lg" [ngbTooltip]="entry.SIFT_object.term" [ngClass]="{'badge-success': entry.SIFT_object.term == 'tolerated', 'badge-danger': entry.SIFT_object.term == 'deleterious'}">{{entry.SIFT_object.score}}</span></span>
-                    <span *ngIf="!entry.SIFT_object">{{entry.SIFT}}</span></td>
-                <td>
-                    <span *ngIf="entry.PolyPhen_object">
-                        <span class="badge badge-lg" [ngbTooltip]="entry.PolyPhen_object.term" [ngClass]="{'badge-primary': entry.PolyPhen_object.term == 'unknown', 'badge-success': entry.PolyPhen_object.term == 'benign', 'badge-warning': entry.PolyPhen_object.term == 'possibly_damaging', 'badge-danger': entry.PolyPhen_object.term == 'probably_damaging'}">
-                        {{entry.PolyPhen_object.score}}</span>
-                    </span>
-                    <span *ngIf="!entry.PolyPhen_object">{{entry.PolyPhen}}</span></td>
-                <td>{{entry.HGVSc}}</td>
-                <td>{{entry.HGVSp}}</td>
-                <td>{{entry.HGVS_OFFSET}}</td>
-                <td>{{entry.AF}}</td>
-                <td>{{entry.gnomAD_AF}}</td>
-                <td>{{entry.gnomAD_AFR_AF}}</td>
-                <td>{{entry.gnomAD_AMR_AF}}</td>
-                <td>{{entry.gnomAD_ASJ_AF}}</td>
-                <td>{{entry.gnomAD_EAS_AF}}</td>
-                <td>{{entry.gnomAD_FIN_AF}}</td>
-                <td>{{entry.gnomAD_NFE_AF}}</td>
-                <td>{{entry.gnomAD_OTH_AF}}</td>
-                <td>{{entry.gnomAD_SAS_AF}}</td>
-                <td>{{entry.CLIN_SIG}}</td>
-                <td>{{entry.SOMATIC}}</td>
-                <td>{{entry.PHENO}}</td>
-                <td>{{entry.PUBMED}}</td>
-                <td>{{entry.GO_CLASSES.split('__').join()}}</td>
-                <td>{{entry.PHENOTYPE}}</td> -->
             </tr>
         </tbody>
         </table>
