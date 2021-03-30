@@ -103,12 +103,12 @@ FIELD_OPTIONS = {
             "description":"Transcript support level",
             "hide": True },
         { 
-            "code": "Exon", 
+            "code": "EXON", 
             "display": "Exon", 
             "description":"Exon number(s) / total",
              "hide": False },
         { 
-            "code": "Intron", 
+            "code": "INTRON", 
             "display": "Intron", 
             "description":"Intron number(s) / total",
              "hide": True },
@@ -219,62 +219,62 @@ FIELD_OPTIONS = {
             "hide": True },
         { 
             "code": "AF",  
-            "display": "AF", 
+            "display": "MAF", 
             "description":"Frequency of existing variant in 1000 Genomes combined population", 
             "hide": False 
             },
         { 
             "code": "gnomAD_AF",  
-            "display": "gnomAD AF", 
+            "display": "gnomAD MAF", 
             "description":"Frequency of existing variant in gnomAD exomes combined population", 
             "hide": True
         },
         { 
             "code": "gnomAD_AFR_AF",  
-            "display": "gnomAD AFR AF", 
+            "display": "gnomAD AFR MAF", 
             "description":"Frequency of existing variant in gnomAD exomes African/American population", 
             "hide": True},
         { 
             "code": "gnomAD_AMR_AF",  
-            "display": "gnomAD AMR AF", 
+            "display": "gnomAD AMR MAF", 
             "description":"Frequency of existing variant in gnomAD exomes American population", 
             "hide": True},
         { 
             "code": "gnomAD_ASJ_AF",  
-            "display": "gnomAD ASJ AF", 
+            "display": "gnomAD ASJ MAF", 
             "description":"Frequency of existing variant in gnomAD exomes Ashkenazi Jewish population", 
             "hide": True},
         { 
             "code": 
             "gnomAD_EAS_AF",  
-            "display": "gnomAD EAS AF", 
+            "display": "gnomAD EAS MAF", 
             "description":"Frequency of existing variant in gnomAD exomes East Asian population", 
             "hide": True },
         { 
             "code": "gnomAD_FIN_AF",  
-            "display": "gnomAD FIN AF", 
+            "display": "gnomAD FIN MAF", 
             "description":"Frequency of existing variant in gnomAD exomes Finnish population", 
             "hide": True },
         { 
             "code": "gnomAD_NFE_AF",  
-            "display": "gnomAD NFE AF", 
+            "display": "gnomAD NFE MAF", 
             "description":"Frequency of existing variant in gnomAD exomes Non-Finnish European population", 
             "hide": True },
         { 
             "code": "gnomAD_OTH_AF",  
-            "display": "gnomAD OTH AF", 
+            "display": "gnomAD OTH MAF", 
             "description":"Frequency of existing variant in gnomAD exomes other combined populations", 
             "hide": True },
         { 
             "code": "gnomAD_SAS_AF",  
-            "display": "gnomAD SAS AF",
+            "display": "gnomAD SAS MAF",
             "description":"Frequency of existing variant in gnomAD exomes South Asian population", 
             "hide": True },
         { 
             "code": "CLIN_SIG",  
             "display": "Clinical significance", 
             "description":"ClinVar clinical significance of the dbSNP variant", 
-            "hide": True },
+            "hide": False },
         { 
             "code": "SOMATIC",  
             "display": "Somatic status", 
