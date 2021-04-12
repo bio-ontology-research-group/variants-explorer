@@ -299,6 +299,11 @@ FIELD_OPTIONS = {
             "code": "PHENOTYPE", 
             "display": "Phenotype Annotation", 
             "description":"Custom phenotype annotations from HPO", 
+            "hide": False },
+        { 
+            "code": "PPI", 
+            "display": "PPIs", 
+            "description":"Protein Protein Interactions", 
             "hide": False }
     ]
 }

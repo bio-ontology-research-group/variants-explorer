@@ -186,7 +186,7 @@
         <tbody>
             <tr *ngFor="let entry of variantRecords; let outIndex = index">
                 <td *ngFor="let column of selectedColumns; let colIndex = index">
-                    <span *ngIf="!['Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES', 'SWISSPROT','TREMBL', 'UNIPROT_ISOFORM', 'UNIPARC'].includes(column.code)">{{entry[column.code]}}</span>
+                    <span *ngIf="!['Gene', 'SIFT', 'PolyPhen', 'PUBMED', 'GO_CLASSES', 'PHENOTYPE', 'PPI', 'SWISSPROT','TREMBL', 'UNIPROT_ISOFORM', 'UNIPARC'].includes(column.code)">{{entry[column.code]}}</span>
                     <span *ngIf="column.code == 'Gene'"><a [href]="'https://asia.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + entry[column.code]" target="_blank">{{entry[column.code]}}</a></span>
                     <span *ngIf="column.code == 'SIFT'">
                         <span *ngIf="entry.SIFT_object"><span class="badge badge-lg" [ngbTooltip]="entry.SIFT_object.term" [ngClass]="{'badge-success': entry.SIFT_object.term == 'tolerated', 'badge-danger': entry.SIFT_object.term == 'deleterious'}">{{entry.SIFT_object.score}}</span></span>
@@ -199,11 +199,25 @@
                         </span>
                         <span *ngIf="!entry.PolyPhen_object">{{entry.PolyPhen}}</span>
                     </span>
-                    <span *ngIf="column.code == 'GO_CLASSES'">{{entry[column.code].split('__').join()}}</span>
+                    <span *ngIf="column.code == 'GO_CLASSES' && entry[column.code].length > 0">
+                        <ul *ngFor="let go of entry[column.code]; let outIndex = index" class="list-unstyled">
+                            <li class="p-0"><a [href]="'http://purl.obolibrary.org/obo/'" target="_blank" >{{go.display}}</a></li>
+                        </ul>
+                    </span>
+                    <span *ngIf="column.code == 'PHENOTYPE' && entry[column.code].length > 0">
+                        <ul *ngFor="let phenotype of entry[column.code]; let outIndex = index" class="list-unstyled">
+                            <li class="p-0"><a [href]="'http://purl.obolibrary.org/obo/'" target="_blank" >{{phenotype.display}}</a></li>
+                        </ul>
+                    </span>
+                    <span *ngIf="column.code == 'PPI' && keys(entry[column.code]).length > 0">
+                        <ul *ngFor="let ppi of keys(entry[column.code]); let outIndex = index" class="list-unstyled">
+                            <li class="p-0"><a [href]="'http://purl.obolibrary.org/obo/'" target="_blank" >{{ppi}}</a></li>
+                        </ul>
+                    </span>
                     <span *ngIf="column.code == 'PUBMED'">
                         <span *ngIf="entry[column.code] != '-'">
                             <ul class="list-unstyled">
-                                <li *ngFor="let pubmedId of  entry[column.code].split(',')"><a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PMID:{{pubmedId}}</a></li>
+                                <li class="p-0" *ngFor="let pubmedId of  entry[column.code].split(',')"><a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PMID:{{pubmedId}}</a></li>
                             </ul>
                         </span>
                         <span *ngIf="entry[column.code] == '-'">{{entry[column.code]}}</span>

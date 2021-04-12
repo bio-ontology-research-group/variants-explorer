@@ -1,5 +1,6 @@
 import logging
 import json
+from variantsexplorer.phenome_lookup import find_entity_by_iris, find_entity_by_startswith
 
 from variantsexplorer.analyzer import ValidationError, VariantAnalyzer
 
@@ -102,8 +103,6 @@ class RecordsView(APIView):
         except Exception as e:
             logger.exception("message")
 
-
-
 class FieldConfigView(APIView):
     """
     Fields configuration
@@ -111,6 +110,42 @@ class FieldConfigView(APIView):
     def get(self, request, format=None):
         try:
             return Response(FIELD_OPTIONS)
+        except Exception as e:
+            logger.exception("message")
+
+class FindEntityByLabelStartsWith(APIView):
+    """
+    List lookup entities by given criteria
+    """
+
+    def get(self, request, format=None):
+        try:
+            term = request.GET.get('term', None)
+            valueset = request.GET.getlist('valueset')
+            result = find_entity_by_startswith(term, valueset) 
+            return Response(result)
+        except Exception as e:
+            logger.exception("message")
+            
+
+class FindEntityByIris(APIView):
+    """
+    List lookup entities by given criteria
+    """
+
+    def post(self, request, format=None):
+        try:
+            entity_iris = request.data['iri']
+
+            valueset = None
+            if 'valueset' in request.data:
+                valueset = request.data['valueset']
+
+            if not entity_iris:
+                raise RuntimeException("'iri' property is required")
+
+            result = find_entity_by_iris(entity_iris, valueset) 
+            return Response(result)
         except Exception as e:
             logger.exception("message")
     

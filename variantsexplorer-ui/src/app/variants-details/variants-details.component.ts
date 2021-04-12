@@ -243,4 +243,6 @@ export class VariantsDetailsComponent implements OnInit {
     this.setSearchLabels();
   }
 
+  keys = Object.keys;
+
 }
