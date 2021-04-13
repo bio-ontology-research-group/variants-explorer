@@ -199,19 +199,42 @@
                         </span>
                         <span *ngIf="!entry.PolyPhen_object">{{entry.PolyPhen}}</span>
                     </span>
-                    <span *ngIf="column.code == 'GO_CLASSES' && entry[column.code].length > 0">
-                        <ul *ngFor="let go of entry[column.code]; let outIndex = index" class="list-unstyled">
-                            <li class="p-0"><a [href]="'http://purl.obolibrary.org/obo/'" target="_blank" >{{go.display}}</a></li>
+                    <span *ngIf="column.code == 'GO_CLASSES' && entry[column.code].length > 0 && entry['GO_CLASSES_temp']">
+                        <ul class="list-unstyled entity-list-250" *ngIf="entry['GO_CLASSES_temp'].seeLess">
+                            <li *ngFor="let go of entry['GO_CLASSES_temp'].truncated; let outIndex = index">
+                                <a [href]="'http://purl.obolibrary.org/obo/' + go.class.replace(':', '_')" target="_blank" class="text-muted" >{{go.display}} <small><i>{{go.class}}</i></small></a>
+                            </li>
+                            <button type="button"  *ngIf="entry['GO_CLASSES_temp'].full.length > 2" (click)="entry['GO_CLASSES_temp'].seeLess=false;" class="btn btn-link p-0 mb-1">See More...</button>
+                        </ul>
+                        <ul class="list-unstyled entity-list-250" *ngIf="!entry['GO_CLASSES_temp'].seeLess">
+                            <li *ngFor="let go of entry['GO_CLASSES_temp'].full; let outIndex = index">
+                                <a [href]="'http://purl.obolibrary.org/obo/' + go.class.replace(':', '_')" target="_blank" class="text-muted">{{go.display}} <small><i>{{go.class}}</i></small></a>
+                            </li>
+                            <button type="button" (click)="entry['GO_CLASSES_temp'].seeLess=true;" class="btn btn-link p-0 mb-1">See Less</button>
                         </ul>
                     </span>
                     <span *ngIf="column.code == 'PHENOTYPE' && entry[column.code].length > 0">
-                        <ul *ngFor="let phenotype of entry[column.code]; let outIndex = index" class="list-unstyled">
-                            <li class="p-0"><a [href]="'http://purl.obolibrary.org/obo/'" target="_blank" >{{phenotype.display}}</a></li>
+                        <ul class="list-unstyled entity-list-250" *ngIf="entry['PHENOTYPE_temp'].seeLess">
+                            <li *ngFor="let hp of entry['PHENOTYPE_temp'].truncated; let outIndex = index">
+                                <a [href]="'http://purl.obolibrary.org/obo/' + hp.class.replace(':', '_')" target="_blank" class="text-muted">{{hp.display}} <small><i>{{hp.class}}</i></small></a>
+                            </li>
+                            <button type="button"  *ngIf="entry['PHENOTYPE_temp'].full.length > 2" (click)="entry['PHENOTYPE_temp'].seeLess=false;" class="btn btn-link p-0 mb-1">See More...</button>
+                        </ul>
+                        <ul class="list-unstyled entity-list-250" *ngIf="!entry['PHENOTYPE_temp'].seeLess">
+                            <li *ngFor="let hp of entry['PHENOTYPE_temp'].full; let outIndex = index">
+                                <a [href]="'http://purl.obolibrary.org/obo/' + hp.class.replace(':', '_')" target="_blank" class="text-muted">{{hp.display}} <small><i>{{hp.class}}</i></small></a>
+                            </li>
+                            <button type="button" (click)="entry['PHENOTYPE_temp'].seeLess=true;" class="btn btn-link p-0 mb-1">See Less</button>
                         </ul>
                     </span>
-                    <span *ngIf="column.code == 'PPI' && keys(entry[column.code]).length > 0">
-                        <ul *ngFor="let ppi of keys(entry[column.code]); let outIndex = index" class="list-unstyled">
-                            <li class="p-0"><a [href]="'http://purl.obolibrary.org/obo/'" target="_blank" >{{ppi}}</a></li>
+                    <span *ngIf="column.code == 'PPI' && entry['PPI'] && keys(entry['PPI']).length > 0">
+                        <ul *ngFor="let ppi of keys(entry[column.code]); let outIndex = index" class="list-unstyled entity-list-250">
+                            <li>{{ppi}}
+                            <br *ngIf="!entry['ppiSeeLess']"/>
+                            <span *ngIf="!entry['ppiSeeLess']">{{entry[column.code][ppi].join(', ')}}</span>
+                            <button type="button" *ngIf="entry['ppiSeeLess']" (click)="entry['ppiSeeLess']=false;" class="btn btn-link p-0 mb-1"><i class="fas fa-caret-right"></i></button>
+                            <button type="button" *ngIf="!entry['ppiSeeLess']" (click)="entry['ppiSeeLess']=true;" class="btn btn-link p-0 mb-1">hide</button>
+                            </li>
                         </ul>
                     </span>
                     <span *ngIf="column.code == 'PUBMED'">

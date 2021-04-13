@@ -99,6 +99,21 @@ export class VariantsDetailsComponent implements OnInit {
     this.veSrv.findRecords(this.jobId, filter).subscribe(res => {
       this.variantRecords = res['data'] && res['data'].length > 1 ? res['data'] : []; 
       this.collectionSize = res['total'];
+
+      this.variantRecords.forEach(element => {
+        element['GO_CLASSES_temp'] = {};
+        element['GO_CLASSES_temp']['truncated'] = element['GO_CLASSES'].slice(0,2);
+        element['GO_CLASSES_temp']['seeLess'] = true;
+        element['GO_CLASSES_temp']['full'] = element['GO_CLASSES']
+
+
+        element['PHENOTYPE_temp'] = {};
+        element['PHENOTYPE_temp']['truncated'] = element['PHENOTYPE'].slice(0,2);
+        element['PHENOTYPE_temp']['seeLess'] = true;
+        element['PHENOTYPE_temp']['full'] = element['PHENOTYPE']
+
+        element['ppiSeeLess']=true;
+      });
       console.log(res)
     });
   }
