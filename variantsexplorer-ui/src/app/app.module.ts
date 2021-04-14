@@ -13,6 +13,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { VariantsExplorerService } from './variants-explorer.service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbdSortableHeader } from './sortable.directive';
+import { LookupService } from './lookup.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,6 @@ import { NgbdSortableHeader } from './sortable.directive';
     UploadFormComponent,
     VariantsDetailsComponent,
     NgbdSortableHeader
-    
   ],
   imports: [
     BrowserModule,
@@ -31,9 +32,10 @@ import { NgbdSortableHeader } from './sortable.directive';
     HttpClientModule,
     NgSelectModule,
     NgbModule,
-    AppRoutingModule
+    AppRoutingModule,
+    BrowserAnimationsModule
   ],
-  providers: [VariantsExplorerService],
+  providers: [VariantsExplorerService, LookupService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,5 +1,6 @@
 import logging
 import json
+from variantsexplorer.aberowl import executeDlQuery
 from variantsexplorer.phenome_lookup import find_entity_by_iris, find_entity_by_startswith
 
 from variantsexplorer.analyzer import ValidationError, VariantAnalyzer
@@ -151,3 +152,18 @@ class FindEntityByIris(APIView):
     
 
 
+
+class AberowlDLQuery(APIView):
+    """
+    List lookup entities by given criteria
+    """
+
+    def get(self, request, format=None):
+        try:
+            query = request.GET.get('query')
+            type = request.GET.get('type')
+            ontology = request.GET.get('ontology')
+            result = executeDlQuery(query, type, ontology)
+            return Response(result)
+        except Exception as e:
+            logger.exception("message")

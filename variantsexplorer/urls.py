@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from variantsexplorer.views import FieldConfigView, JobView, JobInstanceView, RecordsView
+from variantsexplorer.views import AberowlDLQuery, FieldConfigView, JobView, JobInstanceView, RecordsView
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/job/<jobid>', JobInstanceView.as_view()),
     path('api/job/<jobid>/record', RecordsView.as_view()),
     path('api/config', FieldConfigView.as_view()),
+    path('api/aberowl/dlquery', AberowlDLQuery.as_view()),
 ]

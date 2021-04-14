@@ -6,6 +6,9 @@ import { NgSelectConfig } from '@ng-select/ng-select';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Location } from "@angular/common";
 import { NgbdSortableHeader, SortEvent } from '../sortable.directive';
+import { concat, Observable, of, Subject  } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators'
+import { LookupService } from '../lookup.service';
 @Component({
   selector: 'app-variants-details',
   templateUrl: './variants-details.component.html',
@@ -30,11 +33,17 @@ export class VariantsDetailsComponent implements OnInit {
   searchedTermsObjs=[];
   selectedColumns = [];
 
+  phenotype$ : Observable<any>;
+  phenotypeLoading = false;
+  phenotypeInput$ = new Subject<string>();
+  phenotypeNeigborhood = null; 
+
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
     private router: Router,
     public fb: FormBuilder,
     private readonly location: Location,
+    private lookupSrv: LookupService,
     private config: NgSelectConfig) { 
       this.config.appendTo = 'body';
       this.veSrv.getConfig().subscribe(res => {
@@ -51,6 +60,7 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [[]],
       AFMin: [''],
       AFMax: [''],
+      'PHENOTYPE.class' : [null] 
     });
 
     this.route.params.subscribe(params => {
@@ -69,7 +79,9 @@ export class VariantsDetailsComponent implements OnInit {
       this.setSearchLabels();
       this.setFormValues();
       this.findVariantRecords();
+      this.initPhenotypeFilter();
     });
+    this.loadPhenotype();
   }
 
   get f() { return this.searchForm.controls }
@@ -132,6 +144,12 @@ export class VariantsDetailsComponent implements OnInit {
     this.setFilters();
     this.navigate();
   }
+  
+  onPhenotypeSelect(event) {
+    console.log(event)
+    this.setFilters();
+    this.navigate();
+  }
 
   setFilters() {
     this.queryParams = {};
@@ -147,7 +165,9 @@ export class VariantsDetailsComponent implements OnInit {
           }
 
         } else if (Array.isArray(this.f[key].value)) {
-          this.queryParams[key] = _.map(this.f[key].value, obj => obj.code);
+          this.queryParams[key] = _.map(this.f[key].value, obj => obj['code'] ? obj.code : obj.class);
+        }  else if (typeof this.f[key].value === 'object') {
+          this.queryParams[key] = this.f[key].value.identifier;
         } else {
           this.queryParams[key] = this.f[key].value
         }
@@ -187,6 +207,7 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [],
       AFMin: '',
       AFMax: '',
+      'PHENOTYPE.class' : null 
     };
     Object.keys(this.queryParams).forEach(val => {
       if (Array.isArray(this.queryParams[val])) {
@@ -202,6 +223,7 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   setValue(key, value, formObj){
+    console.log(key, value, formObj);
     if (value.substring(0,2) == 'le') {
       formObj[key + 'Max'] = value.substring(2, value.length);
     } else if (value.substring(0,2) == 'ge') {
@@ -254,10 +276,54 @@ export class VariantsDetailsComponent implements OnInit {
     this.setFormValues();
     const urlTree = this.router.createUrlTree([], {relativeTo:this.route, queryParams: this.queryParams});
     this.location.go(urlTree.toString()); 
+    this.initPhenotypeFilter();
     this.findVariantRecords();
     this.setSearchLabels();
   }
 
   keys = Object.keys;
+
+  trackByFn(item: any) {
+    return item.class;
+  }
+
+  loadPhenotype() {
+    this.phenotype$ = concat(
+        of([]), // default items
+        this.phenotypeInput$.pipe(
+            distinctUntilChanged(),
+            tap(() => this.phenotypeLoading = true),
+            switchMap(term => this.lookupSrv.findEntityByLabelStartsWith(term, ['HP'], 10).pipe(
+                catchError(() => of([])), // empty list on error
+                tap(() => this.phenotypeLoading = false)
+            ))
+        )
+    );
+  }
+
+  initPhenotypeFilter(){
+    if (this.queryParams['PHENOTYPE.class']) {
+      let phenotype = this.queryParams['PHENOTYPE.class'];
+      if (!this.phenotypeNeigborhood) {
+        phenotype = 'http://purl.obolibrary.org/obo/' + phenotype.replace(':', '_');
+      }
+      this.getPhenotypeNeigborhood(phenotype);
+    }
+  }
+
+  getPhenotypeNeigborhood(phenotype) {
+    this.phenotypeNeigborhood = {};
+    this.lookupSrv.findEquivalent(phenotype, 'HP').subscribe(res => {
+      this.phenotypeNeigborhood['class'] = res['result'][0];
+    });
+
+    this.lookupSrv.findSuperClass(phenotype, 'HP').subscribe(res => {
+      this.phenotypeNeigborhood['superclass'] = res['result'][0];
+    });
+
+    this.lookupSrv.findSubClass(phenotype, 'HP').subscribe(res => {
+      this.phenotypeNeigborhood['subclass'] = res['result'];
+    });
+  }
 
 }
