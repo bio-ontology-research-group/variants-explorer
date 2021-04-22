@@ -146,7 +146,14 @@ export class VariantsDetailsComponent implements OnInit {
   }
   
   onPhenotypeSelect(event) {
-    console.log(event)
+    console.log(event);
+    this.setFilters();
+    this.navigate();
+  }
+
+  onPhenotypeBtn(hpClass) {
+    hpClass = hpClass.split('/').pop().replace('_',':');
+    this.f['PHENOTYPE.class'].setValue(hpClass);
     this.setFilters();
     this.navigate();
   }
@@ -188,6 +195,10 @@ export class VariantsDetailsComponent implements OnInit {
         delete params[keyPart];
       }
     } else {
+      if (params[key].includes('HP:')) {
+        console.log("here with??????", params[key])
+        this.phenotypeNeigborhood = null;
+      }
       delete params[key];
     }
     this.queryParams = params;
@@ -195,8 +206,9 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   clearFilters() {
-    this.queryParams={};
-    this.searchedTermsObjs=[];
+    this.queryParams = {};
+    this.searchedTermsObjs = [];
+    this.phenotypeNeigborhood = null;
     this.navigate();
   }
 
@@ -210,6 +222,7 @@ export class VariantsDetailsComponent implements OnInit {
       'PHENOTYPE.class' : null 
     };
     Object.keys(this.queryParams).forEach(val => {
+      console.log(val, this.queryParams[val])
       if (Array.isArray(this.queryParams[val])) {
         this.queryParams[val].forEach(item => {
           this.setValue(val, item, formVal);
@@ -223,7 +236,6 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   setValue(key, value, formObj){
-    console.log(key, value, formObj);
     if (value.substring(0,2) == 'le') {
       formObj[key + 'Max'] = value.substring(2, value.length);
     } else if (value.substring(0,2) == 'ge') {
@@ -232,8 +244,11 @@ export class VariantsDetailsComponent implements OnInit {
       if (this.fieldConfig && this.fieldConfig[key.split('_')[0]]) {
         let codeObj = _.findWhere(this.fieldConfig[key.split('_')[0]], {"code" : value});
         formObj[key].push(codeObj ? codeObj:value);
+      } else {
+        formObj[key] = value;
       }
     }
+    // console.log(key, value, formObj);
   }
 
   setSearchLabels() {
@@ -304,10 +319,13 @@ export class VariantsDetailsComponent implements OnInit {
   initPhenotypeFilter(){
     if (this.queryParams['PHENOTYPE.class']) {
       let phenotype = this.queryParams['PHENOTYPE.class'];
-      if (!this.phenotypeNeigborhood) {
-        phenotype = 'http://purl.obolibrary.org/obo/' + phenotype.replace(':', '_');
+      if(this.phenotypeNeigborhood) {
+        console.log(this.phenotypeNeigborhood.class, this.phenotypeNeigborhood.class.class == this.queryParams['PHENOTYPE.class'].replace(':', '_'));
       }
-      this.getPhenotypeNeigborhood(phenotype);
+      if (!this.phenotypeNeigborhood || (this.phenotypeNeigborhood && this.phenotypeNeigborhood.class.class.split('/').pop() != phenotype.replace(':', '_'))) {
+        phenotype = 'http://purl.obolibrary.org/obo/' + phenotype.replace(':', '_');
+        this.getPhenotypeNeigborhood(phenotype);
+      }
     }
   }
 
@@ -318,7 +336,7 @@ export class VariantsDetailsComponent implements OnInit {
     });
 
     this.lookupSrv.findSuperClass(phenotype, 'HP').subscribe(res => {
-      this.phenotypeNeigborhood['superclass'] = res['result'][0];
+      this.phenotypeNeigborhood['superclass'] = res['result'].length > 0 ? res['result'][0]: null;
     });
 
     this.lookupSrv.findSubClass(phenotype, 'HP').subscribe(res => {

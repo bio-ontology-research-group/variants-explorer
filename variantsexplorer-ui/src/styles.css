@@ -149,3 +149,6 @@ th[sortable].desc:after {
 .entity-list-150 {
     min-width: 150px !important;
 }
+a:hover {
+    cursor:pointer;
+}

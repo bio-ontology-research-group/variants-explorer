@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="row p-3">
-        <div class="col-2 p-0 d-none d-md-block bg-light sidebar">
+        <div class="col-3 p-0 d-none d-md-block bg-light sidebar">
             <form [formGroup]="searchForm">
             <ngb-accordion #a="ngbAccordion" activeIds="custom-panel-1,custom-panel-2,custom-panel-3">
                 <ngb-panel id="custom-panel-1">
@@ -41,7 +41,7 @@
                     </div>
                     </ng-template>
                     <ng-template ngbPanelContent>
-                    <div class="form-group" *ngIf="fieldConfig">
+                    <div class="form-group" *ngIf="fieldConfig && !phenotypeNeigborhood">
                         <ng-select [items]="phenotype$ | async"
                                 [hideSelected]="true"
                                 [trackByFn]="trackByFn"
@@ -58,14 +58,12 @@
                     </div>
                     <div>
                         <ul class="list-unstyled" *ngIf="phenotypeNeigborhood">
-                            <li *ngIf="phenotypeNeigborhood.superclass">- <a [href]="'/job/60743e6b5fd195e19ad6244c?PHENOTYPE.class=' + phenotypeNeigborhood.superclass.class.split('/').pop()">{{phenotypeNeigborhood.superclass.label}}</a></li>
+                            <li *ngIf="phenotypeNeigborhood.superclass"><button (click)="onPhenotypeBtn(phenotypeNeigborhood.superclass.class)" class="btn btn-link p-0 text-left">{{phenotypeNeigborhood.superclass.label}}</button></li>
                             <ul  class="list-unstyled ml-2" *ngIf="phenotypeNeigborhood.class">
-                                <li>-- <strong>{{phenotypeNeigborhood.class.label}}</strong></li>
+                                <li>- <strong>{{phenotypeNeigborhood.class.label}}</strong></li>
                                 <ul class="list-unstyled  ml-4" *ngIf="phenotypeNeigborhood.subclass && phenotypeNeigborhood.subclass.length > 0">
                                     <li *ngFor="let subclass of phenotypeNeigborhood.subclass">
-                                        --- <a [href]="'/job/60743e6b5fd195e19ad6244c?PHENOTYPE.class=' + subclass.class.split('/').pop()">
-                                            {{subclass.label}}
-                                        </a>
+                                        -- <a (click)="onPhenotypeBtn(subclass.class)" class="btn-link p-0 text-left">{{subclass.label}}</a>
                                     </li>
                                 </ul>
                             </ul>
@@ -177,7 +175,7 @@
             </ngb-accordion>
             </form>
         </div>
-        <div class="col-10">
+        <div class="col-9">
         <div class="col-12"><h5 class="font-weight-bold">Result Preview</h5></div>
         <div class="col-12 flex-inline"><span class="chip" *ngFor="let obj of searchedTermsObjs; let outIndex = index">
             <span *ngIf="obj.value.substring(0,2) == 'le'">{{obj.key.split(":")[0].replace("_object", "")}} {{obj.value.replace("le", "< ")}}</span>
