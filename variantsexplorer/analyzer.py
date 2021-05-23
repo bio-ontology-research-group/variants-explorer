@@ -242,6 +242,14 @@ class VariantAnalyzer:
         del filter['limit']
         del filter['offset']
         del filter['orderby']
+        if 'ontology_filter' in filter:
+            if 'HP:' in filter['ontology_filter']:
+                filter['PHENOTYPE.class'] = filter['ontology_filter']
+            elif 'GO:' in filter['ontology_filter']:
+                filter['GO_CLASSES.class'] = filter['ontology_filter']
+
+            del filter['ontology_filter']
+        print(filter)
         clone = filter.copy()
         for key in clone:
             if ',' in clone[key]:

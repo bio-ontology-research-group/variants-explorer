@@ -60,7 +60,7 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [[]],
       AFMin: [''],
       AFMax: [''],
-      'PHENOTYPE.class' : [null] 
+      'ontology_filter' : [null] 
     });
 
     this.route.params.subscribe(params => {
@@ -153,7 +153,7 @@ export class VariantsDetailsComponent implements OnInit {
 
   onPhenotypeBtn(hpClass) {
     hpClass = hpClass.split('/').pop().replace('_',':');
-    this.f['PHENOTYPE.class'].setValue(hpClass);
+    this.f['ontology_filter'].setValue(hpClass);
     this.setFilters();
     this.navigate();
   }
@@ -195,9 +195,10 @@ export class VariantsDetailsComponent implements OnInit {
         delete params[keyPart];
       }
     } else {
-      if (params[key].includes('HP:')) {
+      if (params[key].includes('HP:') || params[key].includes('GO:')) {
         console.log("here with??????", params[key])
         this.phenotypeNeigborhood = null;
+        this.phenotypeLoading = false
       }
       delete params[key];
     }
@@ -209,6 +210,7 @@ export class VariantsDetailsComponent implements OnInit {
     this.queryParams = {};
     this.searchedTermsObjs = [];
     this.phenotypeNeigborhood = null;
+    this.phenotypeLoading = false
     this.navigate();
   }
 
@@ -219,7 +221,7 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [],
       AFMin: '',
       AFMax: '',
-      'PHENOTYPE.class' : null 
+      'ontology_filter' : null 
     };
     Object.keys(this.queryParams).forEach(val => {
       console.log(val, this.queryParams[val])
@@ -308,7 +310,7 @@ export class VariantsDetailsComponent implements OnInit {
         this.phenotypeInput$.pipe(
             distinctUntilChanged(),
             tap(() => this.phenotypeLoading = true),
-            switchMap(term => this.lookupSrv.findEntityByLabelStartsWith(term, ['HP'], 10).pipe(
+            switchMap(term => this.lookupSrv.findEntityByLabelStartsWith(term, ['HP', 'GO'], 10).pipe(
                 catchError(() => of([])), // empty list on error
                 tap(() => this.phenotypeLoading = false)
             ))
@@ -317,10 +319,10 @@ export class VariantsDetailsComponent implements OnInit {
   }
 
   initPhenotypeFilter(){
-    if (this.queryParams['PHENOTYPE.class']) {
-      let phenotype = this.queryParams['PHENOTYPE.class'];
+    if (this.queryParams['ontology_filter']) {
+      let phenotype = this.queryParams['ontology_filter'];
       if(this.phenotypeNeigborhood) {
-        console.log(this.phenotypeNeigborhood.class, this.phenotypeNeigborhood.class.class == this.queryParams['PHENOTYPE.class'].replace(':', '_'));
+        console.log(this.phenotypeNeigborhood.class, this.phenotypeNeigborhood.class.class == this.queryParams['ontology_filter'].replace(':', '_'));
       }
       if (!this.phenotypeNeigborhood || (this.phenotypeNeigborhood && this.phenotypeNeigborhood.class.class.split('/').pop() != phenotype.replace(':', '_'))) {
         phenotype = 'http://purl.obolibrary.org/obo/' + phenotype.replace(':', '_');

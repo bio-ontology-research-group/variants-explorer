@@ -48,8 +48,8 @@
                                 [loading]="phenotypeLoading"
                                 typeToSearchText="Please enter 2 or more characters"
                                 [typeahead]="phenotypeInput$"
-                                placeholder="Enter phenotype"
-                                formControlName="PHENOTYPE.class"  
+                                placeholder="Enter phenotype or protein function"
+                                formControlName="ontology_filter"  
                                 (change)="onPhenotypeSelect($event)">    
                             <ng-template ng-option-tmp let-item="item">
                                 {{item.label[0]}} <small><i>{{item.identifier}}</i></small>
