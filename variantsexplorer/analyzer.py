@@ -28,7 +28,7 @@ FAILED = 'Failed'
 def execute(id):
     os.makedirs(os.path.join(settings.DATA_DIR, settings.OUTPUT_DIR), exist_ok=True)
     job = db.get(id)
-    print(job, id)
+    logger.info("Start executing job: %s", str(job))
     rel_input_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, settings.INPUT_DIR, job['filepath'].rsplit("/", 1)[1])
     out_filepath = os.path.join(settings.OUTPUT_DIR, job['filepath'].rsplit("/", 1)[1])
     rel_out_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, out_filepath)
@@ -43,19 +43,13 @@ def execute(id):
         --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap -custom {PPI_DATA_FILE},PPI,bed,overlap'
     print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
     lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
-        
-    # CMD = f'docker run -t -i -v {get_volumn_param()} ensemblorg/ensembl-vep ./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
-    #     --species homo_sapiens --assembly {assembly} --symbol --transcript_version --hgvs --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
-    #     --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap'
-
-    # process = subprocess.Popen(CMD, stdout=subprocess.PIPE, text=True, shell=True)
-    # error = ''
-    # for line in process.stdout:
-    #    error += line
-
+    
     error = ''
     for line in lines:
         error += line
+    
+    if error.strip():
+        logger.error("Error occured while %s", error)
     
     if error:
         job['error'] = error
@@ -77,7 +71,7 @@ def execute(id):
         #         job['output_data'].append(entry)
 
     job['modified_at'] = datetime.now()
-    print(error, "|", job)
+    logger.info("Job executed: %s", str(job))
     db.update(id, job)
 
 
@@ -206,15 +200,19 @@ class VariantAnalyzer:
         print(job, file, filename)
         os.makedirs(os.path.join(settings.DATA_DIR, settings.INPUT_DIR), exist_ok=True)
         if file:
-            filepath = os.path.join(settings.DATA_DIR, settings.INPUT_DIR,  self.create_incremented_name(str(file)))
+            filename = self.create_incremented_name(str(file))
+            filepath = os.path.join(settings.DATA_DIR, settings.INPUT_DIR, filename)
             self.write_file(file, filepath)
             job['filepath'] = filepath
+            job['filename'] = filename
             name_part=filename
 
         elif 'content' in job:
-            filepath = os.path.join(settings.DATA_DIR, settings.INPUT_DIR,  str(uuid.uuid4()) + ".vcf")
+            filename = str(uuid.uuid4()) + ".vcf"
+            filepath = os.path.join(settings.DATA_DIR, settings.INPUT_DIR,  filename)
             self.write_text(job['content'], filepath)
             job['filepath'] = filepath
+            job['filename'] = filename
             name_part = 'pasted data'
         
         job['submitted_at'] = datetime.now()

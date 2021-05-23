@@ -121,8 +121,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
 DATA_DIR = os.path.join(BASE_DIR, 'vep_data')
 INPUT_DIR = 'input'
 OUTPUT_DIR = 'output'
 VEP_CONTAINER_BASE_DIR= '/opt/vep/.vep'
+
+STATIC_URL = '/downloads/'
+STATICFILES_DIRS = [
+    os.path.join(DATA_DIR, OUTPUT_DIR),
+]
