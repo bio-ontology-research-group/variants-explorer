@@ -15,6 +15,10 @@ if not client:
 
 db = client['variantexplorer']
 
+def get_connection():
+  client = MongoClient()
+  return client['variantexplorer']
+
 def insert(doc):
   col = db.jobs_col
   return col.insert_one(doc)
@@ -44,8 +48,11 @@ def find():
 
   return result
 
-def get(id):
-  col = db.jobs_col
+def get(id, forked_conn = None):
+  if forked_conn:
+    col = forked_conn.jobs_col
+  else:
+    col = db.jobs_col
   return col.find_one({"_id": ObjectId(str(id))})
 
 def find_records(job_id, filter, limit=None, offset=None, orderby=None) :
@@ -102,12 +109,18 @@ def delete(id):
   col = db.jobs_col
   return col.delete_one({"_id": ObjectId(str(id))})
 
-def update(id, doc):
-  col = db.jobs_col
+def update(id, doc, forked_conn = None):
+  if forked_conn:
+    col = forked_conn.jobs_col
+  else:
+    col = db.jobs_col
   return col.update_one({"_id": id}, {"$set" : doc})
 
-def insert_record(doc):
-  col = db.records_col
+def insert_record(doc, forked_conn = None):
+  if forked_conn:
+    col = forked_conn.records_col
+  else:
+    col = db.records_col
   return col.insert_one(doc)
 
 def delete_records(job_id):
@@ -115,7 +128,6 @@ def delete_records(job_id):
   return col.delete_many({"job_id": str(id)})
 
 def next_seq_number(seq_name):
-  print(seq_name, ">>>>>>>>>>>")
   seq = db.seqs_col.find_and_modify(
         query={ '_id' : seq_name },
         update={'$inc': {'count': 1}},

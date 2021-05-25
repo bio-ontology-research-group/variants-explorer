@@ -27,7 +27,8 @@ FAILED = 'Failed'
 
 def execute(id):
     os.makedirs(os.path.join(settings.DATA_DIR, settings.OUTPUT_DIR), exist_ok=True)
-    job = db.get(id)
+    conn = db.get_connection()
+    job = db.get(id,conn)
     logger.info("Start executing job: %s", str(job))
     rel_input_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, settings.INPUT_DIR, job['filepath'].rsplit("/", 1)[1])
     out_filepath = os.path.join(settings.OUTPUT_DIR, job['filepath'].rsplit("/", 1)[1])
@@ -63,7 +64,7 @@ def execute(id):
             "hp" : resolve_hp(df['PHENOTYPE'])
         }
         records =  df.to_dict('records')
-        save_records(records, job, cache)
+        save_records(records, job, cache, conn)
 
         # with open(job['output_filepath'] , 'r') as output_file:
         #     for line in output_file.readlines():
@@ -72,10 +73,10 @@ def execute(id):
 
     job['modified_at'] = datetime.now()
     logger.info("Job executed: %s", str(job))
-    db.update(id, job)
+    db.update(id, job, conn)
 
 
-def save_records(records, job, cache):
+def save_records(records, job, cache, db_conn):
     for item in records:
         item['job_id'] = str(job['_id'])
         item['SIFT_object'] = parse_score_field(item['SIFT'])
@@ -84,7 +85,7 @@ def save_records(records, job, cache):
         item['GO_CLASSES'] = parse_go_functions(item['GO_CLASSES'], cache['go'])
         item['PHENOTYPE'] = parse_phenotype(item['PHENOTYPE'], cache['hp'])
         item['PPI'] = parse_ppi(item['PPI'])
-        db.insert_record(item)
+        db.insert_record(item, db_conn)
 
 def parse_number_field(value):
     if not value.strip() or '-' in value:
@@ -249,7 +250,6 @@ class VariantAnalyzer:
                 filter['GO_CLASSES.class'] = filter['ontology_filter']
 
             del filter['ontology_filter']
-        print(filter)
         clone = filter.copy()
         for key in clone:
             if ',' in clone[key]:
