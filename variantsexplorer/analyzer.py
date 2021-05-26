@@ -24,73 +24,162 @@ MIME_TYPE_JSON = "application/json"
 QUEUED = 'Queued'
 DONE = 'Done'
 FAILED = 'Failed'
+CHUNK_SIZE = 10 ** 6
 
 def execute(id):
     os.makedirs(os.path.join(settings.DATA_DIR, settings.OUTPUT_DIR), exist_ok=True)
     conn = db.get_connection()
     job = db.get(id,conn)
     logger.info("Start executing job: %s", str(job))
-    rel_input_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, settings.INPUT_DIR, job['filepath'].rsplit("/", 1)[1])
-    out_filepath = os.path.join(settings.OUTPUT_DIR, job['filepath'].rsplit("/", 1)[1])
-    rel_out_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, out_filepath)
-    GO_ANNO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.go.bed.gz')
-    PHENO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
-    PPI_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.ppi.bed.gz')
-    # dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
-    assembly = job['assembly']
 
-    CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
-        --species homo_sapiens --assembly {assembly} --symbol --transcript_version --tsl --numbers  --check_existing --hgvs --biotype --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
-        --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap -custom {PPI_DATA_FILE},PPI,bed,overlap'
-    print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
-    lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
+    try:
+
+        rel_input_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, settings.INPUT_DIR, job['filepath'].rsplit("/", 1)[1])
+        out_filepath = os.path.join(settings.OUTPUT_DIR, job['filepath'].rsplit("/", 1)[1])
+        rel_out_filepath = os.path.join(settings.VEP_CONTAINER_BASE_DIR, out_filepath)
+        GO_ANNO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.go.bed.gz')
+        PHENO_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
+        PPI_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.ppi.bed.gz')
+        # dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
+        assembly = job['assembly']
+
+        CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
+            --species homo_sapiens --assembly {assembly} --symbol --transcript_version --tsl --numbers  --check_existing --hgvs --biotype --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
+            --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap -custom {PPI_DATA_FILE},PPI,bed,overlap'
+        print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
+        lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
+        
+        error = ''
+        for line in lines:
+            error += line
+        
+        if error.strip():
+            logger.error("Error occured while %s", error)
+        else:
+            logger.info("File is processed by VEP")
+        
+        if error:
+            job['error'] = error
+            job['status'] = FAILED
+        else:
+            job['output_filepath'] = os.path.join(settings.DATA_DIR, out_filepath)
+            job['status'] = DONE
+
+            with pd.read_csv(job['output_filepath'], chunksize=CHUNK_SIZE, sep='\t', skiprows=75) as reader:
+                for chunk in reader:
+                    process_dataframe(chunk, job, conn)
+
+                
+            # df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=75)
+            # cache = {
+            #     "go" : resolve_go(df['GO_CLASSES']),
+            #     "hp" : resolve_hp(df['PHENOTYPE'])
+            # }
+            # records =  df.to_dict('records')
+            # save_records(records, job, conn)
+
+            # with open(job['output_filepath'] , 'r') as output_file:
+            #     for line in output_file.readlines():
+            #         entry = json.loads(line)
+            #         job['output_data'].append(entry)
+
+        job['modified_at'] = datetime.now()
+        logger.info("Job executed: %s", str(job))
+        db.update(id, job, conn)
     
-    error = ''
-    for line in lines:
-        error += line
-    
-    if error.strip():
-        logger.error("Error occured while %s", error)
-    
-    if error:
-        job['error'] = error
+    except Exception as e:
+        logger.exception("message")
+        if os.path.exists(job['filepath']):
+            os.remove(job['filepath'])
+        if 'output_filepath' in job and os.path.exists(job['output_filepath']):
+            os.remove(job['output_filepath'])
+        db.delete_records(id)
+
+        job['error'] = "Failed to process file."
         job['status'] = FAILED
-    else:
-        job['output_filepath'] = os.path.join(settings.DATA_DIR, out_filepath)
-        job['status'] = DONE
-        df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=75)
-        cache = {
-            "go" : resolve_go(df['GO_CLASSES']),
-            "hp" : resolve_hp(df['PHENOTYPE'])
-        }
-        records =  df.to_dict('records')
-        save_records(records, job, cache, conn)
-
-        # with open(job['output_filepath'] , 'r') as output_file:
-        #     for line in output_file.readlines():
-        #         entry = json.loads(line)
-        #         job['output_data'].append(entry)
-
-    job['modified_at'] = datetime.now()
-    logger.info("Job executed: %s", str(job))
-    db.update(id, job, conn)
+        db.update(id, job, conn)
+        
 
 
-def save_records(records, job, cache, db_conn):
-    for item in records:
-        item['job_id'] = str(job['_id'])
-        item['SIFT_object'] = parse_score_field(item['SIFT'])
-        item['PolyPhen_object'] = parse_score_field(item['PolyPhen'])
-        item['AF'] = parse_number_field(item['AF'])
-        item['GO_CLASSES'] = parse_go_functions(item['GO_CLASSES'], cache['go'])
-        item['PHENOTYPE'] = parse_phenotype(item['PHENOTYPE'], cache['hp'])
-        item['PPI'] = parse_ppi(item['PPI'])
-        db.insert_record(item, db_conn)
+def process_dataframe(df, job, db_conn):
+    df['job_id'] = str(job['_id'])
+    df.AF = df.AF.astype(str).str.replace('-', 'nan').astype(float).fillna('')
+    df['SIFT_object'] = df.SIFT.astype(str).str.replace('-', '').transform(parse_score_field)
+    df['PolyPhen_object'] = df.PolyPhen.astype(str).str.replace('-', '').transform(parse_score_field)
+    df.GO_CLASSES = df.GO_CLASSES.astype(str).str.replace('-', '').str.split('##')
+    df.PHENOTYPE = df.PHENOTYPE.astype(str).transform(parse_phenotype)
+    df.PPI = df.PPI.astype(str).transform(parse_ppi)
+    records =  df.to_dict('records')
+    db.insert_records(records, db_conn)
 
-def parse_number_field(value):
-    if not value.strip() or '-' in value:
-        return None
-    return float(value)
+# def save_records(records, job, db_conn):
+#     for item in records:
+#         item['job_id'] = str(job['_id'])
+#         item['SIFT_object'] = parse_score_field(item['SIFT'])
+#         item['PolyPhen_object'] = parse_score_field(item['PolyPhen'])
+#         item['AF'] = parse_number_field(item['AF'])
+#         item['GO_CLASSES'] = parse_go_functions(item['GO_CLASSES'], cache['go'])
+#         item['PHENOTYPE'] = parse_phenotype(item['PHENOTYPE'], cache['hp'])
+#         item['PPI'] = parse_ppi(item['PPI'])
+#         db.insert_record(item, db_conn)
+
+# def parse_number_field(value):
+#     if not value.strip() or '-' in value:
+#         return None
+#     return float(value)
+    
+# def parse_score_field(score):
+#     if not score.strip() or '-' in score:
+#         return None
+    
+#     parts =  score.strip().split('(')
+#     return {'term': parts[0], 'score': float(parts[1][:-1])}
+
+# def parse_go_functions(value, cache):
+#     if not value.strip() or '-' in value:
+#         return []
+
+#     golist = []
+#     for go_class in value.split('##'):
+#         entry = {"class" : go_class}
+#         if go_class in cache:
+#             entry["display"] = cache[go_class]["label"][0]
+
+#         golist.append(entry)
+        
+#     return golist
+
+# def parse_phenotype(value, cache):
+#     if not value.strip() or '-' == value:
+#         return []
+
+#     hplist = []
+#     for item in value.split('__'):
+#         for hp_class in item.split('--')[1].split('##'):
+#             entry = {"class" : hp_class}
+#             if hp_class in cache:
+#                 entry["display"] = cache[hp_class]["label"][0]
+
+#             hplist.append(entry)
+        
+#     return hplist
+
+# def parse_ppi(value):
+#     if not value.strip() or '-' == value:
+#         return None
+
+#     ppi = {}
+#     for protein in value.split('__'):
+#         protein_parts = protein.split('--')
+#         ppi[protein_parts[0]] = protein_parts[1].split('##')
+
+#     return ppi
+
+def parse_score_field(score):
+    if score:
+        parts =  score.strip().split('(')
+        return {'term': parts[0], 'score': float(parts[1][:-1])}
+    return None
     
 def parse_score_field(score):
     if not score.strip() or '-' in score:
@@ -99,38 +188,20 @@ def parse_score_field(score):
     parts =  score.strip().split('(')
     return {'term': parts[0], 'score': float(parts[1][:-1])}
 
-def parse_go_functions(value, cache):
+def parse_phenotype(value):
     if not value.strip() or '-' in value:
-        return []
-
-    golist = []
-    for go_class in value.split('##'):
-        entry = {"class" : go_class}
-        if go_class in cache:
-            entry["display"] = cache[go_class]["label"][0]
-
-        golist.append(entry)
-        
-    return golist
-
-def parse_phenotype(value, cache):
-    if not value.strip() or '-' == value:
         return []
 
     hplist = []
     for item in value.split('__'):
+        print(">>>>", item)
         for hp_class in item.split('--')[1].split('##'):
-            entry = {"class" : hp_class}
-            if hp_class in cache:
-                entry["display"] = cache[hp_class]["label"][0]
-
-            hplist.append(entry)
-        
+            hplist.append(hp_class)
     return hplist
 
 def parse_ppi(value):
-    if not value.strip() or '-' == value:
-        return None
+    if not value.strip() or '-' in value:
+        return {}
 
     ppi = {}
     for protein in value.split('__'):

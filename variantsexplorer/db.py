@@ -123,6 +123,14 @@ def insert_record(doc, forked_conn = None):
     col = db.records_col
   return col.insert_one(doc)
 
+
+def insert_records(docs, forked_conn = None):
+  if forked_conn:
+    col = forked_conn.records_col
+  else:
+    col = db.records_col
+  return col.insert_many(docs)
+
 def delete_records(job_id):
   col = db.records_col
   return col.delete_many({"job_id": str(id)})

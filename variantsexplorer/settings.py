@@ -130,3 +130,26 @@ STATIC_URL = '/downloads/'
 STATICFILES_DIRS = [
     os.path.join(DATA_DIR, OUTPUT_DIR),
 ]
+
+LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'console': {
+                'format': '%(asctime)s %(name)-12s %(levelname)-2s %(message)s'
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'console'
+            }
+        },
+        'loggers': {
+            'variantsexplorer': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            }
+        },
+    }

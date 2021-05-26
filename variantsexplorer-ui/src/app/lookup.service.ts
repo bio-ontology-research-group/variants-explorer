@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Injectable()
 export class LookupService {
 
   PHENOME_API_URI = 'http://phenomebrowser.net/api'
   ABEROWL_API_URI = 'http://aber-owl.net/api'
+  OBO_PREFIX = 'http://purl.obolibrary.org/obo/'
+
+  P = 'http://phenomebrowser.net/api'
 
   options = {
     headers:  new HttpHeaders({
@@ -32,13 +35,14 @@ export class LookupService {
     return this.http.get(`${this.PHENOME_API_URI}/entity/_startswith?${queryStr}`, this.options);
   }
 
-  findEntityByIris(iris:any[], valueset:string) {
-    var req;
-    if (!valueset) {
-      req = {'iri': iris}
-    } else {
-      req = {'iri': iris, valueset: valueset}
-    }
+  findEntityByOboId(oboIds:any[]) : Observable<any> {
+    let valueset = oboIds[0].split(':')[0];
+    let iris = []
+    oboIds.forEach(function (value) {
+      iris.push(this.OBO_PREFIX + value.replace(':', '_')) 
+    });
+
+    var req = {iri: iris, valueset: valueset}  
     return this.http.post(`${this.PHENOME_API_URI}/entity/_findbyiri`, req, this.options);
   }
 
@@ -53,6 +57,7 @@ export class LookupService {
   findEquivalent(classIdentifier: string, ontology:string) {
     return this.executeDlQuery(classIdentifier, 'equivalent', ontology);
   }
+
   executeDlQuery(classIdentifier: string, type: string, ontology:string) {
     let params = new URLSearchParams();
     params.set('query', classIdentifier); 
