@@ -102,7 +102,7 @@ def execute(id):
 
 
 def process_dataframe(df, job, db_conn):
-    df['job_id'] = str(job['_id'])
+    # df['job_id'] = str(job['_id'])
     df.AF = df.AF.astype(str).str.replace('-', 'nan').astype(float).fillna('')
     df['SIFT_object'] = df.SIFT.astype(str).str.replace('-', '').transform(parse_score_field)
     df['PolyPhen_object'] = df.PolyPhen.astype(str).str.replace('-', '').transform(parse_score_field)
@@ -110,8 +110,7 @@ def process_dataframe(df, job, db_conn):
     df.PHENOTYPE = df.PHENOTYPE.astype(str).transform(parse_phenotype)
     df.PPI = df.PPI.astype(str).transform(parse_ppi)
     records =  df.to_dict('records')
-    # print(records)
-    db.insert_records(records, db_conn)
+    db.insert_records(str(job['_id']), records, db_conn)
 
 # def save_records(records, job, db_conn):
 #     for item in records:
@@ -124,17 +123,6 @@ def process_dataframe(df, job, db_conn):
 #         item['PPI'] = parse_ppi(item['PPI'])
 #         db.insert_record(item, db_conn)
 
-# def parse_number_field(value):
-#     if not value.strip() or '-' in value:
-#         return None
-#     return float(value)
-    
-# def parse_score_field(score):
-#     if not score.strip() or '-' in score:
-#         return None
-    
-#     parts =  score.strip().split('(')
-#     return {'term': parts[0], 'score': float(parts[1][:-1])}
 
 # def parse_go_functions(value, cache):
 #     if not value.strip() or '-' in value:
@@ -164,17 +152,6 @@ def process_dataframe(df, job, db_conn):
 #             hplist.append(entry)
         
 #     return hplist
-
-# def parse_ppi(value):
-#     if not value.strip() or '-' == value:
-#         return None
-
-#     ppi = {}
-#     for protein in value.split('__'):
-#         protein_parts = protein.split('--')
-#         ppi[protein_parts[0]] = protein_parts[1].split('##')
-
-#     return ppi
 
 def parse_score_field(score):
     if score:
@@ -349,17 +326,6 @@ class VariantAnalyzer:
     def write_text(self, content, filepath):
         with open(filepath, 'w+') as out_file:
             out_file.write(content)
-
-    # def write_file(self, file, filepath):
-    #     os.umask(0)
-    #     with open(os.open(filepath, os.O_CREAT | os.O_WRONLY, 0o777), 'wb+') as out_file:
-    #         for chunk in file.chunks():
-    #             out_file.write(chunk)
-
-    # def write_text(self, content, filepath):
-    #     os.umask(0)
-    #     with open(os.open(filepath, os.O_CREAT | os.O_WRONLY, 0o777), 'w+') as out_file:
-    #         out_file.write(content)
 
     def get_name_and_extension(self, filename):
         return os.path.splitext(filename)

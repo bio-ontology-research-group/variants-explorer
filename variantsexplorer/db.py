@@ -27,17 +27,8 @@ def drop_data():
   col = db.jobs_col
   col.drop()
 
-# def delete_by_disease_ranktype(disease_code, rank_type):
-#   col = db.ukb_col
-#   query = { 'disease_code': disease_code,  "rank_type": rank_type }
-#   result = col.delete_many(query)
-#   logger.info("deleted documents: %d", result.deleted_count)
-
 def find():
   col = db.jobs_col
-  # query = { 'disease_code': disease_code } #, 'pvalue' : { '$lte' : 0.05}
-  # if rank_type:
-  #   query["rank_type"] = rank_type
   query = {}
   result = list(col.find(query, {"filepath":0, "output_filepath":0, "output_data":0}).sort("submitted_at", -1))
   for obj in result:
@@ -56,8 +47,7 @@ def get(id, forked_conn = None):
   return col.find_one({"_id": ObjectId(str(id))})
 
 def find_records(job_id, filter, limit=None, offset=None, orderby=None) :
-  col = db.records_col
-  filter['job_id'] = job_id
+  col = db[job_id]
 
   for key in filter:
     if isinstance(filter[key], list):
@@ -116,24 +106,26 @@ def update(id, doc, forked_conn = None):
     col = db.jobs_col
   return col.update_one({"_id": id}, {"$set" : doc})
 
-def insert_record(doc, forked_conn = None):
+def insert_record(job_id, doc, forked_conn = None):
   if forked_conn:
-    col = forked_conn.records_col
+    col = forked_conn[job_id]
   else:
-    col = db.records_col
+    col = db[job_id]
   return col.insert_one(doc)
 
 
-def insert_records(docs, forked_conn = None):
+def insert_records(job_id, docs, forked_conn = None):
   if forked_conn:
-    col = forked_conn.records_col
+    col = forked_conn[job_id]
   else:
-    col = db.records_col
+    col = db[job_id]
   return col.insert_many(docs)
 
 def delete_records(job_id):
-  col = db.records_col
-  return col.delete_many({"job_id": str(id)})
+  # col = db.records_col
+  # return col.delete_many({"job_id": str(id)})
+  col = db[job_id]
+  return col.drop()
 
 def next_seq_number(seq_name):
   seq = db.seqs_col.find_and_modify(

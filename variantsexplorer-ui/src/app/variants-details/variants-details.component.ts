@@ -273,6 +273,7 @@ export class VariantsDetailsComponent implements OnInit {
 
   onHeadersSelect(event) {
     console.log(this.selectedColumns);
+    
   }
 
   onSort({column, direction}: SortEvent) {
@@ -338,15 +339,15 @@ export class VariantsDetailsComponent implements OnInit {
   getPhenotypeNeigborhood(phenotype) {
     this.phenotypeNeigborhood = {};
     this.lookupSrv.findEquivalent(phenotype, 'HP').subscribe(res => {
-      this.phenotypeNeigborhood['class'] = res['result'][0];
+      this.phenotypeNeigborhood['class'] = res ? res['result'][0] : null;
     });
 
     this.lookupSrv.findSuperClass(phenotype, 'HP').subscribe(res => {
-      this.phenotypeNeigborhood['superclass'] = res['result'].length > 0 ? res['result'][0]: null;
+      this.phenotypeNeigborhood['superclass'] = res && res['result'].length > 0 ? res['result'][0]: null;
     });
 
     this.lookupSrv.findSubClass(phenotype, 'HP').subscribe(res => {
-      this.phenotypeNeigborhood['subclass'] = res['result'];
+      this.phenotypeNeigborhood['subclass'] = res ? res['result'][0] : null;
     });
   }
 
