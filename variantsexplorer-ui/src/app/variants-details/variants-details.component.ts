@@ -38,6 +38,9 @@ export class VariantsDetailsComponent implements OnInit {
   phenotypeInput$ = new Subject<string>();
   phenotypeNeigborhood = null; 
 
+  goCache = {};
+  hpCache = {};
+
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
     private router: Router,
@@ -112,6 +115,10 @@ export class VariantsDetailsComponent implements OnInit {
       this.variantRecords = res['data'] && res['data'].length > 1 ? res['data'] : []; 
       this.collectionSize = res['total'];
 
+      let goClasses = this.variantRecords.map(record => record['GO_CLASSES']).flat();
+      let hpClasses = this.variantRecords.map(record => record['PHENOTYPE']).flat();
+      this.resolveOntologyClasses(goClasses, hpClasses)
+
       this.variantRecords.forEach(element => {
         element['GO_CLASSES_temp'] = {};
         element['GO_CLASSES_temp']['truncated'] = element['GO_CLASSES'].slice(0,2);
@@ -126,7 +133,6 @@ export class VariantsDetailsComponent implements OnInit {
 
         element['ppiSeeLess']=true;
       });
-      console.log(res)
     });
   }
 
@@ -196,7 +202,6 @@ export class VariantsDetailsComponent implements OnInit {
       }
     } else {
       if (params[key].includes('HP:') || params[key].includes('GO:')) {
-        console.log("here with??????", params[key])
         this.phenotypeNeigborhood = null;
         this.phenotypeLoading = false
       }
@@ -224,7 +229,7 @@ export class VariantsDetailsComponent implements OnInit {
       'ontology_filter' : null 
     };
     Object.keys(this.queryParams).forEach(val => {
-      console.log(val, this.queryParams[val])
+      // console.log(val, this.queryParams[val])
       if (Array.isArray(this.queryParams[val])) {
         this.queryParams[val].forEach(item => {
           this.setValue(val, item, formVal);
@@ -268,7 +273,6 @@ export class VariantsDetailsComponent implements OnInit {
 
   onHeadersSelect(event) {
     console.log(this.selectedColumns);
-    
   }
 
   onSort({column, direction}: SortEvent) {
@@ -344,6 +348,24 @@ export class VariantsDetailsComponent implements OnInit {
     this.lookupSrv.findSubClass(phenotype, 'HP').subscribe(res => {
       this.phenotypeNeigborhood['subclass'] = res['result'];
     });
+  }
+
+  resolveOntologyClasses(goClasses, phenotypeClasses){
+    if (goClasses.length > 0) {
+      this.lookupSrv.findEntityByOboId(goClasses).subscribe(data => {
+        data.forEach(element => {
+          this.goCache[element.identifier] = element;
+        });
+      });
+    }
+
+    if (phenotypeClasses.length > 0) {
+      this.lookupSrv.findEntityByOboId(phenotypeClasses).subscribe(data => {
+        data.forEach(element => {
+          this.hpCache[element.identifier] = element;
+        });
+      });
+    }
   }
 
 }

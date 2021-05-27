@@ -38,8 +38,9 @@ export class LookupService {
   findEntityByOboId(oboIds:any[]) : Observable<any> {
     let valueset = oboIds[0].split(':')[0];
     let iris = []
+    let that = this
     oboIds.forEach(function (value) {
-      iris.push(this.OBO_PREFIX + value.replace(':', '_')) 
+      iris.push(that.OBO_PREFIX + value.replace(':', '_')) 
     });
 
     var req = {iri: iris, valueset: valueset}  

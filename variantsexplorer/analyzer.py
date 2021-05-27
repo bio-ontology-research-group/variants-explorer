@@ -110,6 +110,7 @@ def process_dataframe(df, job, db_conn):
     df.PHENOTYPE = df.PHENOTYPE.astype(str).transform(parse_phenotype)
     df.PPI = df.PPI.astype(str).transform(parse_ppi)
     records =  df.to_dict('records')
+    # print(records)
     db.insert_records(records, db_conn)
 
 # def save_records(records, job, db_conn):
@@ -189,18 +190,18 @@ def parse_score_field(score):
     return {'term': parts[0], 'score': float(parts[1][:-1])}
 
 def parse_phenotype(value):
-    if not value.strip() or '-' in value:
+    if not value.strip() or '-' == value:
         return []
 
     hplist = []
     for item in value.split('__'):
-        print(">>>>", item)
         for hp_class in item.split('--')[1].split('##'):
             hplist.append(hp_class)
+            
     return hplist
 
 def parse_ppi(value):
-    if not value.strip() or '-' in value:
+    if not value.strip() or '-' == value:
         return {}
 
     ppi = {}
@@ -316,9 +317,9 @@ class VariantAnalyzer:
         del filter['orderby']
         if 'ontology_filter' in filter:
             if 'HP:' in filter['ontology_filter']:
-                filter['PHENOTYPE.class'] = filter['ontology_filter']
+                filter['PHENOTYPE'] = filter['ontology_filter']
             elif 'GO:' in filter['ontology_filter']:
-                filter['GO_CLASSES.class'] = filter['ontology_filter']
+                filter['GO_CLASSES'] = filter['ontology_filter']
 
             del filter['ontology_filter']
         clone = filter.copy()

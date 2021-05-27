@@ -36,7 +36,7 @@
                 <ngb-panel id="custom-panel-1">
                     <ng-template ngbPanelHeader let-opened="opened">
                     <div class="d-flex align-items-center justify-content-between">
-                        <h5 class="m-0">Phenotype Filter</h5>
+                        <h5 class="m-0">Phenotype/Protein Function Filter</h5>
                         <button ngbPanelToggle class="btn btn-link p-0"><i class="fas fa-caret-right" *ngIf="!opened"></i><i class="fas fa-caret-down" *ngIf="opened"></i></button>
                     </div>
                     </ng-template>
@@ -248,13 +248,13 @@
                     <span *ngIf="column.code == 'GO_CLASSES' && entry[column.code].length > 0 && entry['GO_CLASSES_temp']">
                         <ul class="list-unstyled entity-list-250" *ngIf="entry['GO_CLASSES_temp'].seeLess">
                             <li *ngFor="let go of entry['GO_CLASSES_temp'].truncated; let outIndex = index">
-                                <a [href]="'http://purl.obolibrary.org/obo/' + go.class.replace(':', '_')" target="_blank" class="text-muted" >{{go.display}} <small><i>{{go.class}}</i></small></a>
+                                <a [href]="'http://purl.obolibrary.org/obo/' + go.replace(':', '_')" target="_blank" class="text-muted" >{{goCache[go]?.label[0]}} <small><i>{{go}}</i></small></a>
                             </li>
                             <button type="button"  *ngIf="entry['GO_CLASSES_temp'].full.length > 2" (click)="entry['GO_CLASSES_temp'].seeLess=false;" class="btn btn-link p-0 mb-1">See More...</button>
                         </ul>
                         <ul class="list-unstyled entity-list-250" *ngIf="!entry['GO_CLASSES_temp'].seeLess">
                             <li *ngFor="let go of entry['GO_CLASSES_temp'].full; let outIndex = index">
-                                <a [href]="'http://purl.obolibrary.org/obo/' + go.class.replace(':', '_')" target="_blank" class="text-muted">{{go.display}} <small><i>{{go.class}}</i></small></a>
+                                <a [href]="'http://purl.obolibrary.org/obo/' + go.replace(':', '_')" target="_blank" class="text-muted">{{goCache[go]?.label[0]}} <small><i>{{go}}</i></small></a>
                             </li>
                             <button type="button" (click)="entry['GO_CLASSES_temp'].seeLess=true;" class="btn btn-link p-0 mb-1">See Less</button>
                         </ul>
@@ -262,13 +262,13 @@
                     <span *ngIf="column.code == 'PHENOTYPE' && entry[column.code].length > 0">
                         <ul class="list-unstyled entity-list-250" *ngIf="entry['PHENOTYPE_temp'].seeLess">
                             <li *ngFor="let hp of entry['PHENOTYPE_temp'].truncated; let outIndex = index">
-                                <a [href]="'http://purl.obolibrary.org/obo/' + hp.class.replace(':', '_')" target="_blank" class="text-muted">{{hp.display}} <small><i>{{hp.class}}</i></small></a>
+                                <a [href]="'http://purl.obolibrary.org/obo/' + hp.replace(':', '_')" target="_blank" class="text-muted">{{hpCache[hp]?.label[0]}}<small><i>{{hp}}</i></small></a>
                             </li>
                             <button type="button"  *ngIf="entry['PHENOTYPE_temp'].full.length > 2" (click)="entry['PHENOTYPE_temp'].seeLess=false;" class="btn btn-link p-0 mb-1">See More...</button>
                         </ul>
                         <ul class="list-unstyled entity-list-250" *ngIf="!entry['PHENOTYPE_temp'].seeLess">
                             <li *ngFor="let hp of entry['PHENOTYPE_temp'].full; let outIndex = index">
-                                <a [href]="'http://purl.obolibrary.org/obo/' + hp.class.replace(':', '_')" target="_blank" class="text-muted">{{hp.display}} <small><i>{{hp.class}}</i></small></a>
+                                <a [href]="'http://purl.obolibrary.org/obo/' + hp.replace(':', '_')" target="_blank" class="text-muted">{{hpCache[hp]?.label[0]}} <small><i>{{hp}}</i></small></a>
                             </li>
                             <button type="button" (click)="entry['PHENOTYPE_temp'].seeLess=true;" class="btn btn-link p-0 mb-1">See Less</button>
                         </ul>
