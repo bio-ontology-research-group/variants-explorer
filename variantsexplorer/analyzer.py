@@ -22,6 +22,7 @@ if not client:
 
 MIME_TYPE_JSON = "application/json"
 QUEUED = 'Queued'
+PROCESSING = 'Processing'
 DONE = 'Done'
 FAILED = 'Failed'
 CHUNK_SIZE = 10 ** 6
@@ -43,12 +44,17 @@ def execute(id):
         # dbNSFP_DATA_FILE = os.path.join(settings.VEP_CONTAINER_BASE_DIR, 'Plugins', 'sorted.plugin.pheno.bed.gz')
         assembly = job['assembly']
 
+        job['status'] = PROCESSING
+        db.update(id, job, conn)
+
         CMD = f'./vep -input_file {rel_input_filepath} -output_file {rel_out_filepath} --buffer_size 500 \
             --species homo_sapiens --assembly {assembly} --symbol --transcript_version --tsl --numbers  --check_existing --hgvs --biotype --cache --tab --no_stats --polyphen b --sift b --af --af_gnomad --pubmed --uniprot --protein \
             --custom {GO_ANNO_DATA_FILE},GO_CLASSES,bed,overlap --custom {PHENO_DATA_FILE},PHENOTYPE,bed,overlap -custom {PPI_DATA_FILE},PPI,bed,overlap'
         print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
         lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
         
+
+
         error = ''
         for line in lines:
             error += line
@@ -65,9 +71,12 @@ def execute(id):
             job['output_filepath'] = os.path.join(settings.DATA_DIR, out_filepath)
             job['status'] = DONE
 
+            count=1
             with pd.read_csv(job['output_filepath'], chunksize=CHUNK_SIZE, sep='\t', skiprows=75) as reader:
                 for chunk in reader:
+                    logger.info("processing chunk %d", count)
                     process_dataframe(chunk, job, conn)
+                    count += 1
 
                 
             # df = pd.read_csv(job['output_filepath'], sep='\t', skiprows=75)

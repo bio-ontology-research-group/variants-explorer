@@ -84,7 +84,7 @@
             <tr *ngFor="let job of jobPage; let jobIndex = index">
                 <td>{{job.name}}</td>
                 <td>{{job.assembly}}</td>
-                <td><span class="badge " [ngClass]="{'badge-success':job.status == 'Done', 'badge-secondary':job.status == 'Queued', 'badge-danger':job.status == 'Failed'}">{{job.status}}</span></td>
+                <td><span class="badge " [ngClass]="{'badge-success':job.status == 'Done', 'badge-secondary':job.status == 'Queued', 'badge-danger':job.status == 'Failed', 'badge-info':job.status == 'Processing'}">{{job.status}}</span></td>
                 <td>{{job.submitted_at}}</td>
                 <td class="text-right"><a [href]="'/job/' + job._id" class="text-dark"><i class="fas fa-eye"></i></a><a (click)="delete(job._id)" class="btn text-dark p-0 pl-2"><i class="fas fa-trash-alt"></i></a></td>
             </tr>
