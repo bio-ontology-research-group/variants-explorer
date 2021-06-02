@@ -25,7 +25,7 @@ QUEUED = 'Queued'
 PROCESSING = 'Processing'
 DONE = 'Done'
 FAILED = 'Failed'
-CHUNK_SIZE = 10 ** 6
+CHUNK_SIZE = 10 ** 5
 
 def execute(id):
     os.makedirs(os.path.join(settings.DATA_DIR, settings.OUTPUT_DIR), exist_ok=True)
