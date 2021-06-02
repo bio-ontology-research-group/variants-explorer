@@ -369,4 +369,15 @@ export class VariantsDetailsComponent implements OnInit {
     }
   }
 
+
+  exportRecords() {
+    let filter = Object.assign({}, this.queryParams);
+    let params = new URLSearchParams();
+    for(let key in filter){
+        params.set(key, filter[key]) 
+    }
+
+    window.open(`/api/job/${this.jobId}/record/_export?${params.toString()}`);
+  }
+
 }

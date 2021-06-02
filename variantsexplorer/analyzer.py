@@ -298,9 +298,12 @@ class VariantAnalyzer:
         return obj
 
     def find_records(self, job_id, filter, limit=10, offset=None, orderby=None):
-        del filter['limit']
-        del filter['offset']
-        del filter['orderby']
+        if 'limit' in filter:
+            del filter['limit']
+        if 'offset' in filter:
+            del filter['offset']
+        if 'orderby' in filter:
+            del filter['orderby']
         if 'ontology_filter' in filter:
             if 'HP:' in filter['ontology_filter']:
                 filter['PHENOTYPE'] = filter['ontology_filter']
@@ -316,6 +319,15 @@ class VariantAnalyzer:
             if not clone[key].strip():
                del filter[key]
         return db.find_records(job_id, filter, limit, offset, orderby)
+
+    def export_records(self, job_id, filter):
+        result = self.find_records(job_id, filter, limit=None)
+        df = pd.DataFrame(result['data'])
+        df.drop('_id', axis='columns', inplace=True)
+        df.drop('SIFT_object', axis='columns', inplace=True)
+        df.drop('PolyPhen_object', axis='columns', inplace=True)
+        return df.to_csv(sep="\t", index=False)
+
 
     def delete(self, id):
         job = db.get(id)

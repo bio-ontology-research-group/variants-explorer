@@ -84,6 +84,8 @@ def find_records(job_id, filter, limit=None, offset=None, orderby=None) :
     (property, direction) = (orderby_parts[0], orderby_parts[1])
     direction = 1 if direction == "asc" else -1 
     data = col.find(filter, limit=limit, skip=offset).sort(property, direction)
+  elif not limit and not offset:
+    data = col.find(filter)
   else:
     data = col.find(filter, limit=limit, skip=offset)
   

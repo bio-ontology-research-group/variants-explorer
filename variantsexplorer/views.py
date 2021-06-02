@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from variantsexplorer import db
+from django.http import HttpResponse
 from variantsexplorer.options import FIELD_OPTIONS
 
 logger = logging.getLogger(__name__) 
@@ -165,5 +166,20 @@ class AberowlDLQuery(APIView):
             ontology = request.GET.get('ontology')
             result = executeDlQuery(query, type, ontology)
             return Response(result)
+        except Exception as e:
+            logger.exception("message")
+
+class ExportFilteredData(APIView):
+    """
+    Get latest
+    """
+    service = VariantAnalyzer()
+    def get(self, request, jobid, format=None):
+        try:
+            query_params = request.GET.dict().copy()
+            result = self.service.export_records(jobid, query_params)
+            response = HttpResponse(result, content_type="text/tab-separated-values")
+            response['Content-Disposition'] = 'inline; filename=ve_filtered.tsv'
+            return response
         except Exception as e:
             logger.exception("message")
