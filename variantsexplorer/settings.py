@@ -126,10 +126,11 @@ INPUT_DIR = 'input'
 OUTPUT_DIR = 'output'
 VEP_CONTAINER_BASE_DIR= '/opt/vep/.vep'
 
-STATIC_URL = '/downloads/'
-STATICFILES_DIRS = [
-    os.path.join(DATA_DIR, OUTPUT_DIR),
-]
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+MEDIA_URL = '/downloads/'
+MEDIA_ROOT = os.path.join(DATA_DIR, OUTPUT_DIR)
 
 LOGGING = {
         'version': 1,
