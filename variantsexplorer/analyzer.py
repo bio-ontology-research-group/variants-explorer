@@ -7,6 +7,7 @@ import json
 import pandas as pd
 import variantsexplorer.db as db
 import docker
+from docker.errors import ContainerError
 
 from datetime import datetime
 from django.conf import settings
@@ -53,8 +54,6 @@ def execute(id):
         print(rel_input_filepath, out_filepath, CMD,  get_mode(), client)
         lines = client.containers.run("ensemblorg/ensembl-vep", CMD, volumes={f'{os.getcwd()}/vep_data': {'bind': '/opt/vep/.vep', 'mode': get_mode()}}, stream=True)
         
-
-
         error = ''
         for line in lines:
             error += line
@@ -74,7 +73,7 @@ def execute(id):
             count=1
             with pd.read_csv(job['output_filepath'], chunksize=CHUNK_SIZE, sep='\t', skiprows=75) as reader:
                 for chunk in reader:
-                    logger.info("processing chunk %d", count)
+                    logger.info("processing chunk %d | %s", count, job['output_filepath'])
                     process_dataframe(chunk, job, conn)
                     count += 1
 
@@ -96,17 +95,25 @@ def execute(id):
         logger.info("Job executed: %s", str(job))
         db.update(id, job, conn)
     
+
+    except ContainerError as e:
+        logger.exception("message")
+        handle_error(id, job, conn, str(e))
     except Exception as e:
         logger.exception("message")
-        if os.path.exists(job['filepath']):
-            os.remove(job['filepath'])
-        if 'output_filepath' in job and os.path.exists(job['output_filepath']):
-            os.remove(job['output_filepath'])
-        db.delete_records(id)
+        handle_error(id, job, conn)
 
-        job['error'] = "Failed to process file."
-        job['status'] = FAILED
-        db.update(id, job, conn)
+
+def handle_error(job_id, job, conn, error_msg=''):
+    if os.path.exists(job['filepath']):
+        os.remove(job['filepath'])
+    if 'output_filepath' in job and os.path.exists(job['output_filepath']):
+        os.remove(job['output_filepath'])
+    db.delete_records(id)
+
+    job['error'] = "Failed to process file. " + error_msg
+    job['status'] = FAILED
+    db.update(job_id, job, conn)
         
 
 
@@ -318,11 +325,18 @@ class VariantAnalyzer:
 
             if not clone[key].strip():
                del filter[key]
-        return db.find_records(job_id, filter, limit, offset, orderby)
+        result = db.find_records(job_id, filter, limit, offset, orderby)
+        for obj in result['data']:
+            obj['_id']=str(obj['_id'])
+        return result
 
     def export_records(self, job_id, filter):
         result = self.find_records(job_id, filter, limit=None)
         df = pd.DataFrame(result['data'])
+
+        #clear memory
+        del result
+
         df.drop('_id', axis='columns', inplace=True)
         df.drop('SIFT_object', axis='columns', inplace=True)
         df.drop('PolyPhen_object', axis='columns', inplace=True)

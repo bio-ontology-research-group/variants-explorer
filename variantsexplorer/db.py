@@ -90,8 +90,6 @@ def find_records(job_id, filter, limit=None, offset=None, orderby=None) :
     data = col.find(filter, limit=limit, skip=offset)
   
   data = list(data)
-  for obj in data:
-      obj['_id']=str(obj['_id'])
   count = col.count_documents(filter)
 
   result = {'data': data, 'total': count}
@@ -126,7 +124,7 @@ def insert_records(job_id, docs, forked_conn = None):
 def delete_records(job_id):
   # col = db.records_col
   # return col.delete_many({"job_id": str(id)})
-  col = db[job_id]
+  col = db[str(job_id)]
   return col.drop()
 
 def next_seq_number(seq_name):
