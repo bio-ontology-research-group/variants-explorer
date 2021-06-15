@@ -356,7 +356,7 @@ export class VariantsDetailsComponent implements OnInit {
     });
 
     this.lookupSrv.findSubClass(phenotype, 'HP').subscribe(res => {
-      this.phenotypeNeigborhood['subclass'] = res ? res['result'][0] : null;
+      this.phenotypeNeigborhood['subclass'] = res && res['result'].length > 0 ? res['result'] : [];
     });
   }
 
