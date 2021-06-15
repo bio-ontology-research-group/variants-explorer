@@ -41,6 +41,8 @@ export class VariantsDetailsComponent implements OnInit {
   goCache = {};
   hpCache = {};
 
+  recordLoading = false;
+
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
     private router: Router,
@@ -70,6 +72,11 @@ export class VariantsDetailsComponent implements OnInit {
       this.jobId = params.id;
       this.veSrv.getJob(params.id).subscribe(res => {
         this.job = res
+        if (this.job.status != 'Done') {
+          this.isCollapsed = false;
+        } else {
+          this.isCollapsed = true;
+        }
       });
       this.findVariantRecords(); 
     });    
@@ -107,6 +114,7 @@ export class VariantsDetailsComponent implements OnInit {
       offset = this.pageSize * (this.page - 1)
     }
     
+    this.recordLoading = true;
     let filter = Object.assign({}, this.queryParams)
     filter['limit'] = this.pageSize;
     filter['offset'] = offset;
@@ -117,8 +125,9 @@ export class VariantsDetailsComponent implements OnInit {
 
       let goClasses = this.variantRecords.map(record => record['GO_CLASSES']).flat();
       let hpClasses = this.variantRecords.map(record => record['PHENOTYPE']).flat();
-      this.resolveOntologyClasses(goClasses, hpClasses)
+      this.resolveOntologyClasses(goClasses, hpClasses);
 
+      this.recordLoading = false;
       this.variantRecords.forEach(element => {
         element['GO_CLASSES_temp'] = {};
         element['GO_CLASSES_temp']['truncated'] = element['GO_CLASSES'].slice(0,2);

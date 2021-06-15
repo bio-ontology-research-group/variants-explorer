@@ -1,8 +1,7 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, OnInit, ViewChild, Directive, Input, Output, EventEmitter, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toJSDate } from '@ng-bootstrap/ng-bootstrap/datepicker/ngb-calendar';
 import { of } from 'rxjs';  
 import { interval } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators'; 
@@ -35,6 +34,8 @@ export class HomeComponent implements OnInit {
   pageSize = 20;
   collectionSize = 0;
   filter = new FormControl('');
+  jobLoading = false;
+  jobFormLoading = false;
 
   jobsFilter = (text: string): any[] => {
     return this.jobs.filter(job => {
@@ -66,11 +67,11 @@ export class HomeComponent implements OnInit {
 
     this.findJobs();
     // refresh list after 10 seconds 
-    interval(10000).subscribe(num => { 
+    setInterval(() => { 
       if (this.isCollapsed) {
         this.findJobs();
       }
-    });
+    }, 10000);
   }
 
   get f() { return this.uploadForm.controls }
@@ -89,6 +90,7 @@ export class HomeComponent implements OnInit {
 
     var inProgress = true;  
     this.errorReport = '';
+    this.jobFormLoading = true;
     this.veSrv.submitJob(formData).pipe(  
       map(event => {  
         switch (event.type) {  
@@ -106,7 +108,7 @@ export class HomeComponent implements OnInit {
           console.log(error)
           return of(error['error'].trim());
         }
-        
+        this.jobFormLoading = false;
         return of(`${this.file.name} upload failed.`);  
       })).subscribe((event: any) => {  
         if (typeof(event) == 'object' && event.status === 201) {  
@@ -117,6 +119,7 @@ export class HomeComponent implements OnInit {
             this.errorReport = event.split('\n');
           }
         }
+        this.jobFormLoading = false;
     }); 
 
   }
@@ -137,8 +140,10 @@ export class HomeComponent implements OnInit {
   }
 
   findJobs(){
+    this.jobLoading = true;
     this.veSrv.find().subscribe(res => {
       this.jobs = res
+      this.jobLoading = false;
       this.jobsFiltered = this.jobsFilter(this.filter.value);
     });
   }

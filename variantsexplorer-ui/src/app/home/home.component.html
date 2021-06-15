@@ -1,6 +1,6 @@
 <div class="card mb-4 wow fadeIn mt-2">
 <div class="card-body">
-    <h4 class="font-weight-bold pb-3"><a routerLink="help" class="text-muted">Varaints Explorer <i class="fas fa-info-circle"></i></a></h4>
+    <h4 class="font-weight-bold pb-3"><a routerLink="help" class="text-muted" placement="bottom" ngbTooltip="Click for help">Varaints Explorer <i class="fas fa-info-circle"></i></a></h4>
     <p>
     <button type="button" class="btn btn-green" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed"
         aria-controls="collapseExample">
@@ -33,10 +33,10 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group  col-md-6">
+                <div class="form-group  col-md-9">
                     <label for="file">or Upload your file</label>
                     <input type="file" #fileUpload id="fileUpload" class="form-control-file" id="file" 
-                        accept=".vcf,.vcf.gz" formControlName="file" (change)="uploadFile($event.target.files)">
+                        accept=".vcf,.vcf.gz" formControlName="file" (change)="uploadFile($event.target.files)" />
                     <small class="form-text text-muted">VCF file format (either in .vcf or .vcf.gz). </small>
                     <div class="invalid-field" *ngIf="f.file.invalid && (f.file.dirty || f.file.touched)">
                         <span *ngIf="f.file.errors.atleastOneFieldRequired">
@@ -52,6 +52,7 @@
                 <input type="radio" formControlName="assembly" class="with-gap" value="GRCh37" class="ml-2">
                 <label class="form-check-label" for="assembly" class="pl-2">GRCh37</label>
             </div>
+            <div class="form-row mt-3" *ngIf="jobFormLoading"><span class="spinner-border  loading-spinner text-success" role="status"><span class="sr-only">Loading...</span></span> <p class="mt-1 ml-2">Uploading file ...</p> </div>
             <div class="form-row mt-3">
                 <button type="submit" class="btn btn-green" [disabled]="uploadForm.invalid" (click)="onSubmit()">Run</button>
                 <button type="submit" class="btn btn-secondary ml-2" (click)="onCancel()">Cancel</button>
@@ -62,7 +63,7 @@
     </div>
     <div class="row mt-2">
         <div class="col-12"><h5 class="font-weight-bold mb-2">Job History</h5></div>
-        <div class="col-12"><button class="btn btn-sm btn-green" (click)="findJobs()" placement="bottom" ngbTooltip="Refresh"><i class="fa fa-sync"></i> Refresh</button></div>
+        <div class="col-12"><button class="btn btn-sm btn-green" (click)="findJobs()" placement="bottom" ngbTooltip="Refresh the jobs list"><i class="fa fa-sync"></i> Refresh</button></div>
     </div>
     <div class="row pl-3 pt-3 pr-3">
         <div class="col-12 p-2 bg-filter">
@@ -70,7 +71,12 @@
             <input class="form-control-sm ml-2" type="text" [formControl]="filter" placeholder="filter"/>
         </div>
         </div>
-        <table class="table table-sm table-striped table-bordered">
+        <div class="text-center py-md-5 col-12" *ngIf="jobLoading">
+            <div class="spinner-border  loading-spinner text-success" style="width: 3rem; height: 3rem;" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <table class="table table-sm table-striped table-bordered" *ngIf="!jobLoading or jobPage.length < 1">
         <thead class="thead-light">
             <tr>
             <th scope="col" sortable="name" (sort)="onSort($event)">Jobs</th>
@@ -84,16 +90,16 @@
             <tr *ngFor="let job of jobPage; let jobIndex = index">
                 <td>{{job.name}}</td>
                 <td>{{job.assembly}}</td>
-                <td><span class="badge " [ngClass]="{'badge-success':job.status == 'Done', 'badge-secondary':job.status == 'Queued', 'badge-danger':job.status == 'Failed', 'badge-info':job.status == 'Processing'}">{{job.status}}</span></td>
+                <td><span class="badge" [ngClass]="{'badge-success':job.status == 'Done', 'badge-secondary':job.status == 'Queued', 'badge-danger':job.status == 'Failed', 'badge-info':job.status == 'Processing'}">{{job.status}}</span></td>
                 <td>{{job.submitted_at}}</td>
                 <td class="text-right"><a [href]="'/job/' + job._id" class="text-dark"><i class="fas fa-eye"></i></a><a (click)="delete(job._id)" class="btn text-dark p-0 pl-2"><i class="fas fa-trash-alt"></i></a></td>
             </tr>
         </tbody>
         </table>
+        <p class="col-12 text-center"><ngb-alert class="alert-secondary" [dismissible]="false" *ngIf="jobPage.length < 1">You have no jobs currently running or recently completed.</ngb-alert></p>
     </div>
     <div class="row panel-footer ml-3" *ngIf="this.jobs.length > 20">
         <select class="custom-select items-dropdown" style="width: auto" [(ngModel)]="pageSize">
-            <option [ngValue]="10">10 items per page</option>
             <option [ngValue]="20">20 items per page</option>
             <option [ngValue]="50">50 items per page</option>
         </select>
