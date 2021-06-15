@@ -9,6 +9,20 @@ FIELD_OPTIONS = {
         { "code" : "benign", "display": "Benign", "description":"less than or equal to 0.446"},
         { "code" : "unknown", "display": "Unknown", "description":"unknown"},
     ],
+    "ClinSig" : [ 
+        { "code" : "affects", "display": "affects", "description":""},
+        { "code" : "association", "display": "association", "description":""},
+        { "code" : "benign", "display": "benign", "description":""},
+        { "code" : "drug", "display": "drug", "description":""},
+        { "code" : "likely_benign", "display": "likely benign", "description":""},
+        { "code" : "likely_pathogenic", "display": "likely pathogenic", "description":""},
+        { "code" : "not_provided", "display": "not provided", "description":""},
+        { "code" : "other", "display": "other", "description":""},
+        { "code" : "pathogenic", "display": "pathogenic", "description":""},
+        { "code" : "protective", "display": "protective", "description":""},
+        { "code" : "risk_factor", "display": "risk factor", "description":""},
+        { "code" : "uncertain significance", "display": "uncertain significance", "description":""}
+    ],
     "Consequence" : [ 
         { "code" : "transcript_ablation", "display": "Transcript ablation", "description":"A feature ablation whereby the deleted region includes a transcript feature", "class":"SO:0001893", "ontology": "SO"},
         { "code" : "splice_acceptor_variant", "display": "Splice acceptor variant", "description":"A splice variant that changes the 2 base region at the 3' end of an intron", "class":"SO:0001574", "ontology": "SO"},

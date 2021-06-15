@@ -61,6 +61,7 @@ export class VariantsDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.searchForm = this.fb.group({
       Consequence: [[]],
+      ClinSig:[[]],
       'SIFT_object.term': [[]],
       'PolyPhen_object.term': [[]],
       AFMin: [''],
@@ -155,6 +156,11 @@ export class VariantsDetailsComponent implements OnInit {
     this.navigate();
   }  
 
+  onClinicalSigSelect(event) {
+    this.setFilters();
+    this.navigate();
+  }  
+
   onPolyphenSelect(event) {
     this.setFilters();
     this.navigate();
@@ -231,6 +237,7 @@ export class VariantsDetailsComponent implements OnInit {
   setFormValues(){
     let formVal = {
       Consequence: [],
+      ClinSig: [],
       'SIFT_object.term': [],
       'PolyPhen_object.term': [],
       AFMin: '',

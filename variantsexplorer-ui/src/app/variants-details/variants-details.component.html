@@ -122,6 +122,18 @@
                             <option *ngFor="let term of fieldConfig.PolyPhen" value="{{term.code}}">{{term.display}}</option>
                         </select>-->
                      </div>
+                     <div class="form-group"  *ngIf="fieldConfig">
+                        <label for="polyphen">Clinical Significance</label>
+                        <ng-select
+                            [items]="fieldConfig.ClinSig"
+                            [multiple]="true"
+                            [hideSelected]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="display"
+                            placeholder="Select"
+                            formControlName="ClinSig"
+                            (change)="onClinicalSigSelect($event)"></ng-select>
+                    </div>
                     </ng-template>
                 </ngb-panel>
                 <ngb-panel id="custom-panel-3">

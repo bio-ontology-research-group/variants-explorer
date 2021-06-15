@@ -318,6 +318,10 @@ class VariantAnalyzer:
                 filter['GO_CLASSES'] = filter['ontology_filter']
 
             del filter['ontology_filter']
+
+        if 'ClinSig' in filter:
+            filter['CLIN_SIG'] = filter['ClinSig']
+            del filter['ClinSig']
         clone = filter.copy()
         for key in clone:
             if ',' in clone[key]:
