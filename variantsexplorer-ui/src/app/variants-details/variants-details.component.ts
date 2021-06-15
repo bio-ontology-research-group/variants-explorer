@@ -141,6 +141,11 @@ export class VariantsDetailsComponent implements OnInit {
         element['PHENOTYPE_temp']['seeLess'] = true;
         element['PHENOTYPE_temp']['full'] = element['PHENOTYPE']
 
+        element['PUBMED_temp'] = {};
+        element['PUBMED_temp']['truncated'] = element['PUBMED'].split(',').slice(0,2);
+        element['PUBMED_temp']['seeLess'] = true;
+        element['PUBMED_temp']['full'] = element['PUBMED'].split(',')
+
         element['ppiSeeLess']=true;
       });
     });

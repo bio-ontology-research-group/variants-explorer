@@ -305,14 +305,31 @@
                             </li>
                         </ul>
                     </span>
-                    <span *ngIf="column.code == 'PUBMED'">
+                    <span *ngIf="column.code == 'PUBMED'">                    
+                        <span *ngIf="entry[column.code].length > 0 && entry[column.code][0] != '-'">
+                            <ul class="list-unstyled entity-list-250" *ngIf="entry['PUBMED_temp'].seeLess">
+                                <li *ngFor="let pubmedId of entry['PUBMED_temp'].truncated; let outIndex = index">
+                                    <a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PMID:{{pubmedId}}</a>
+                                </li>
+                                <button type="button"  *ngIf="entry['PUBMED_temp'].full.length > 2" (click)="entry['PUBMED_temp'].seeLess=false;" class="btn btn-link p-0 mb-1">See More...</button>
+                            </ul>
+                            <ul class="list-unstyled entity-list-250" *ngIf="!entry['PUBMED_temp'].seeLess">
+                                <li *ngFor="let pubmedId of entry['PUBMED_temp'].full; let outIndex = index">
+                                    <a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PMID:{{pubmedId}}</a>
+                                </li>
+                                <button type="button" (click)="entry['PUBMED_temp'].seeLess=true;" class="btn btn-link p-0 mb-1">See Less</button>
+                            </ul>
+                        </span>
+                        <span *ngIf="!(entry[column.code].length > 0 && entry[column.code][0] != '-')">-</span>
+                    </span>
+                    <!--<span *ngIf="column.code == 'PUBMED'">
                         <span *ngIf="entry[column.code] != '-'">
                             <ul class="list-unstyled">
                                 <li class="p-0" *ngFor="let pubmedId of  entry[column.code].split(',')"><a [href]="'https://pubmed.ncbi.nlm.nih.gov/' + pubmedId" target="_blank" >PMID:{{pubmedId}}</a></li>
                             </ul>
                         </span>
-                        <span *ngIf="entry[column.code] == '-'">{{entry[column.code]}}</span>
-                    </span>
+                        <span *ngIf="entry[column.code] == '-'">{{entry[column.code]}}</span> 
+                    </span>-->
                     <span *ngIf="column.code == 'SWISSPROT' || column.code == 'TREMBL' || column.code == 'UNIPROT_ISOFORM'"><a [href]="'https://www.uniprot.org/uniprot/' + entry[column.code].split('.')[0]" target="_blank">{{entry[column.code].split('.')[0]}}</a></span>
                     <span *ngIf="column.code == 'UNIPARC'"><a [href]="'https://www.uniprot.org/uniparc/' + entry[column.code]" target="_blank">{{entry[column.code]}}</a></span>
                 </td>
