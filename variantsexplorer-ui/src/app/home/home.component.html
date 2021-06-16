@@ -96,7 +96,7 @@
             </tr>
         </tbody>
         </table>
-        <p class="col-12 text-center"><ngb-alert class="alert-secondary" [dismissible]="false" *ngIf="jobPage.length < 1">You have no jobs currently running or recently completed.</ngb-alert></p>
+        <p class="col-12 text-center"><ngb-alert class="alert-secondary" [dismissible]="false" *ngIf="jobPage.length < 1 && !jobLoading">You have no jobs currently running or recently completed.</ngb-alert></p>
     </div>
     <div class="row panel-footer ml-3" *ngIf="this.jobs.length > 20">
         <select class="custom-select items-dropdown" style="width: auto" [(ngModel)]="pageSize">
