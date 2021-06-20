@@ -8,6 +8,8 @@ export class LookupService {
   PHENOME_API_URI = 'http://phenomebrowser.net/api'
   ABEROWL_API_URI = 'http://aber-owl.net/api'
   OBO_PREFIX = 'http://purl.obolibrary.org/obo/'
+  UNIPROT_PREFIX = 'http://uniprot.org/uniprot/'
+
 
   P = 'http://phenomebrowser.net/api'
 
@@ -41,6 +43,18 @@ export class LookupService {
     let that = this
     oboIds.forEach(function (value) {
       iris.push(that.OBO_PREFIX + value.replace(':', '_')) 
+    });
+
+    var req = {iri: iris, valueset: valueset}  
+    return this.http.post(`${this.PHENOME_API_URI}/entity/_findbyiri`, req, this.options);
+  }
+
+  findProtein(proteinIds:any[]) : Observable<any> {
+    let valueset = 'Uniprot'
+    let iris = []
+    let that = this
+    proteinIds.forEach(function (value) {
+      iris.push(that.UNIPROT_PREFIX + value);
     });
 
     var req = {iri: iris, valueset: valueset}  

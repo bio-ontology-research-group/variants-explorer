@@ -40,8 +40,11 @@ export class VariantsDetailsComponent implements OnInit {
 
   goCache = {};
   hpCache = {};
+  protCache = {};
 
   recordLoading = false;
+  
+  UNIPROT_PREFIX = '';
 
   constructor(private veSrv: VariantsExplorerService,
     private route: ActivatedRoute,
@@ -56,6 +59,7 @@ export class VariantsDetailsComponent implements OnInit {
         this.setFormValues();
         this.selectedColumns = _.filter(this.fieldConfig.headers, items => items.hide == false);
       });
+      this.UNIPROT_PREFIX = lookupSrv.UNIPROT_PREFIX;
   }
 
   ngOnInit(): void {
@@ -126,7 +130,16 @@ export class VariantsDetailsComponent implements OnInit {
 
       let goClasses = this.variantRecords.map(record => record['GO_CLASSES']).flat();
       let hpClasses = this.variantRecords.map(record => record['PHENOTYPE']).flat();
-      this.resolveOntologyClasses(goClasses, hpClasses);
+      let protClasses = [];
+      this.variantRecords.forEach(val => {
+        Object.keys(val['PPI']).forEach(protKey => {
+          protClasses.push(protKey)
+          protClasses = protClasses.concat(val['PPI'][protKey]);
+        })
+      });
+      protClasses =  Array.from(new Set(protClasses));
+
+      this.resolveOntologyClasses(goClasses, hpClasses, protClasses);
 
       this.recordLoading = false;
       this.variantRecords.forEach(element => {
@@ -372,7 +385,7 @@ export class VariantsDetailsComponent implements OnInit {
     });
   }
 
-  resolveOntologyClasses(goClasses, phenotypeClasses){
+  resolveOntologyClasses(goClasses, phenotypeClasses, protClasses){
     if (goClasses.length > 0) {
       this.lookupSrv.findEntityByOboId(goClasses).subscribe(data => {
         data.forEach(element => {
@@ -385,6 +398,14 @@ export class VariantsDetailsComponent implements OnInit {
       this.lookupSrv.findEntityByOboId(phenotypeClasses).subscribe(data => {
         data.forEach(element => {
           this.hpCache[element.identifier] = element;
+        });
+      });
+    }
+
+    if (protClasses.length > 0) {
+      this.lookupSrv.findProtein(protClasses).subscribe(data => {
+        data.forEach(element => {
+          this.protCache[element.identifier] = element;
         });
       });
     }
