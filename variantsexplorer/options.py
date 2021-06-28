@@ -237,42 +237,6 @@ FIELD_OPTIONS = {
             "description":"Frequency of existing variant in 1000 Genomes combined population", 
             "hide": False 
             },
-        						
-        { 
-            "code": "AFR_AF",  
-            "display": "1000 Genomes AFR MAF", 
-            "description":"Frequency of existing variant in 1000 Genomes combined African/American population", 
-            "hide": True},
-        { 
-            "code": "1000 Genomes AMR_AF",  
-            "display": "AMR MAF", 
-            "description":"Frequency of existing variant in 1000 Genomes combined American population", 
-            "hide": True},
-        { 
-            "code": "EAS_AF",  
-            "display": "1000 Genomes EAS MAF", 
-            "description":"Frequency of existing variant in 1000 Genomes combined East Asian population", 
-            "hide": True },
-        { 
-            "code": "EUR_AF",  
-            "display": "1000 Genomes EUR MAF", 
-            "description":"Frequency of existing variant in 1000 Genomes combined European population", 
-            "hide": True },
-        { 
-            "code": "SAS_AF",  
-            "display": "1000 Genomes SAS MAF",
-            "description":"Frequency of existing variant in 1000 Genomes combined South Asian population", 
-            "hide": True },
-        { 
-            "code": "AA_AF",  
-            "display": "1000 Genomes African American MAF", 
-            "description":"Frequency of existing variant in NHLBI-ESP African American population", 
-            "hide": True},
-        { 
-            "code": "EA_AF",  
-            "display": "1000 Genomes EA MAF", 
-            "description":"Frequency of existing variant in NHLBI-ESP European American population", 
-            "hide": True},
         { 
             "code": "gnomAD_AF",  
             "display": "gnomAD MAF", 
@@ -380,26 +344,6 @@ FIELD_OPTIONS = {
             "display": "Pubmed", 
             "description":"Pubmed ID(s) of publications that cite existing variant", 
             "hide": False },
-        { 
-            "code": "G2P_complete",  
-            "display": "G2P Confidence", 
-            "description":"Indicates this variant completes the allelic requirements for a G2P gene", 
-            "hide": False},
-        { 
-            "code": "G2P_flag",  
-            "display": "Variant count by Zygosity", 
-            "description":"Flags zygosity of valid variants for a G2P gene", 
-            "hide": False},
-        { 
-            "code": "G2P_gene_req",  
-            "display": "Allelic requirement", 
-            "description":"MONO or BI depending on the context in which this gene has been explored", 
-            "hide": False},
-        { 
-            "code": "GO_CLASSES",  
-            "display": "Protein Functions", 
-            "description":"Custom protein function annotations from GO", 
-            "hide": False},
         { 
             "code": "PHENOTYPE", 
             "display": "Phenotype Annotation", 
