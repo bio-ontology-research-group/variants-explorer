@@ -17,13 +17,14 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from variantsexplorer.views import AberowlDLQuery, FieldConfigView, JobView, JobInstanceView, RecordsView, ExportFilteredData
+from variantsexplorer.views import AberowlDLQuery, FieldConfigView, InMemoryRecordsView, JobView, JobInstanceView, RecordsView, ExportFilteredData
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/job', JobView.as_view()),
     path('api/job/<jobid>', JobInstanceView.as_view()),
     path('api/job/<jobid>/record', RecordsView.as_view()),
+    path('api/record', InMemoryRecordsView.as_view()),
     path('api/job/<jobid>/record/_export', ExportFilteredData.as_view()),
     path('api/config', FieldConfigView.as_view()),
     path('api/aberowl/dlquery', AberowlDLQuery.as_view()),

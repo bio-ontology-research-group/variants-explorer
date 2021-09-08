@@ -70,20 +70,23 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [[]],
       AFMin: [''],
       AFMax: [''],
-      'ontology_filter' : [null] 
+      'ontology_filter' : [null],
+      file:['']
     });
 
     this.route.params.subscribe(params => {
       this.jobId = params.id;
-      this.veSrv.getJob(params.id).subscribe(res => {
-        this.job = res
-        if (this.job.status != 'Done') {
-          this.isCollapsed = false;
-        } else {
-          this.isCollapsed = true;
-        }
-      });
-      this.findVariantRecords(); 
+      if (this.jobId) {
+        this.veSrv.getJob(params.id).subscribe(res => {
+          this.job = res
+          if (this.job.status != 'Done') {
+            this.isCollapsed = false;
+          } else {
+            this.isCollapsed = true;
+          }
+        });
+        this.findVariantRecords();
+      } 
     });    
 
 
@@ -124,7 +127,15 @@ export class VariantsDetailsComponent implements OnInit {
     filter['limit'] = this.pageSize;
     filter['offset'] = offset;
     filter['orderby'] = this.orderBy;
-    this.veSrv.findRecords(this.jobId, filter).subscribe(res => {
+
+    let recordObs = null;
+    if (this.jobId) {
+      recordObs = this.veSrv.findRecords(this.jobId, filter);
+    } else {
+      recordObs = this.veSrv.findInMemoryRecords(filter);
+    }
+    
+    recordObs.subscribe(res => {
       this.variantRecords = res['data'] && res['data'].length > 1 ? res['data'] : []; 
       this.collectionSize = res['total'];
 
@@ -260,7 +271,8 @@ export class VariantsDetailsComponent implements OnInit {
       'PolyPhen_object.term': [],
       AFMin: '',
       AFMax: '',
-      'ontology_filter' : null 
+      'ontology_filter' : null,
+      file:''
     };
     Object.keys(this.queryParams).forEach(val => {
       // console.log(val, this.queryParams[val])

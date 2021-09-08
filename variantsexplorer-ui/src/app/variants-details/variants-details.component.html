@@ -2,7 +2,7 @@
 <div class="card-body">
     <h4 class="font-weight-bold pb-3"><a routerLink="help" class="text-muted">Results <i class="fas fa-info-circle"></i></a></h4>
     <button type="button" class="btn btn-green" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed"
-        aria-controls="collapseExample">
+        aria-controls="collapseExample" *ngIf="!queryParams['file']">
         Job Details <i class="fa" [ngClass]="{'fa-plus': isCollapsed, 'fa-minus': !isCollapsed}"></i>
     </button>
     <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
@@ -33,7 +33,7 @@
             </table>
         </div>
     </div>
-    <div class="row p-3" *ngIf="job && job.status == 'Done'">
+    <div class="row p-3" *ngIf="(job && job.status == 'Done') || queryParams['file']">
         <div class="col-3 p-0 d-none d-md-block bg-light sidebar">
             <form [formGroup]="searchForm">
             <ngb-accordion #a="ngbAccordion" activeIds="custom-panel-1,custom-panel-2,custom-panel-3">
@@ -211,7 +211,7 @@
                     <option [ngValue]="50">50 items per page</option>
                 </select>
             </div>
-            <div class="col-7">
+            <div class="col-7" *ngIf="!queryParams['file']">
                 <a *ngIf="searchedTermsObjs.length > 0 && collectionSize > 0" (click)="exportRecords()" class="btn btn-green ml-2 float-right" ngbTooltip="Export Filtered Results"><i class="fas fa-file-export"></i></a>
                 <a  *ngIf="job && job.filename" [href]="'/downloads/' + job.filename" class="btn btn-green ml-2 float-right" ngbTooltip="Download all results"><i class="fas fa-download"></i></a>
                 <a href="/" class="btn btn-green float-right">New Job</a>

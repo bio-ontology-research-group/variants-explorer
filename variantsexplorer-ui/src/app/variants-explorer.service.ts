@@ -46,6 +46,17 @@ export class VariantsExplorerService {
     return this.http.get(url, this.options);
   }
 
+
+  findInMemoryRecords(filter): Observable<any>  {
+    let params = new URLSearchParams();
+    for(let key in filter){
+        params.set(key, filter[key]) 
+    }
+    
+    var url = `api/record?${params.toString()}`;
+    return this.http.get(url, this.options);
+  }
+
   deleteJob(id): Observable<any>  {
     var url = `${this.URL}/${id}`;
     return this.http.delete(url, this.options);

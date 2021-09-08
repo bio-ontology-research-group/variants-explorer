@@ -5,6 +5,7 @@ import multiprocessing
 import subprocess
 import json
 import pandas as pd
+from pymongo import collection
 import variantsexplorer.db as db
 import docker
 from docker.errors import ContainerError
@@ -12,6 +13,9 @@ from docker.errors import ContainerError
 from datetime import datetime
 from django.conf import settings
 from sys import platform
+
+from time import time
+from threading import RLock
 
 from variantsexplorer.phenome_lookup import GO_VS, HPO_VS, OBO_PREFIX, find_entity_by_iris
 
@@ -261,6 +265,8 @@ class ValidationError(Exception):
     pass
 
 class VariantAnalyzer:
+    def __init__(self):
+        self.inmem_entries = ExpiringSet(max_age_seconds=5)
 
     def submit_job(self, job, file=None, filename=None):
         print(job, file, filename)
@@ -305,31 +311,7 @@ class VariantAnalyzer:
         return obj
 
     def find_records(self, job_id, filter, limit=10, offset=None, orderby=None):
-        if 'limit' in filter:
-            del filter['limit']
-        if 'offset' in filter:
-            del filter['offset']
-        if 'orderby' in filter:
-            del filter['orderby']
-        if 'ontology_filter' in filter:
-            if 'HP:' in filter['ontology_filter']:
-                filter['PHENOTYPE'] = filter['ontology_filter']
-            elif 'GO:' in filter['ontology_filter']:
-                filter['GO_CLASSES'] = filter['ontology_filter']
-
-            del filter['ontology_filter']
-
-        if 'ClinSig' in filter:
-            filter['CLIN_SIG'] = filter['ClinSig']
-            del filter['ClinSig']
-
-        clone = filter.copy()
-        for key in clone:
-            if ',' in clone[key]:
-                filter[key] = filter[key].split(",")
-
-            if not clone[key].strip():
-               del filter[key]
+        self.clean_filter(filter)
         result = db.find_records(job_id, filter, limit, offset, orderby)
         for obj in result['data']:
             obj['_id']=str(obj['_id'])
@@ -380,6 +362,84 @@ class VariantAnalyzer:
 
         return filename
 
+
+    def clean_filter(self, filter):
+        if 'limit' in filter:
+            del filter['limit']
+        if 'offset' in filter:
+            del filter['offset']
+        if 'orderby' in filter:
+            del filter['orderby']
+        if 'file' in filter:
+            del filter['file']
+        if 'ontology_filter' in filter:
+            if 'HP:' in filter['ontology_filter']:
+                filter['PHENOTYPE'] = filter['ontology_filter']
+            elif 'GO:' in filter['ontology_filter']:
+                filter['GO_CLASSES'] = filter['ontology_filter']
+
+            del filter['ontology_filter']
+
+        if 'ClinSig' in filter:
+            filter['CLIN_SIG'] = filter['ClinSig']
+            del filter['ClinSig']
+
+        clone = filter.copy()
+        for key in clone:
+            if ',' in clone[key]:
+                filter[key] = filter[key].split(",")
+
+            if not clone[key].strip():
+               del filter[key]
+        
+    def find_inmemory_records(self, file_url, filter, limit=10, offset=None, orderby=None):
+        self.load_file(file_url)
+        self.clean_filter(filter)
+        result = db.find_records(file_url, filter, limit, offset, orderby, inmem=True)
+        for obj in result['data']:
+            obj['_id']=str(obj['_id'])
+        return result
     
 
+    def load_file(self, file_url):
+        global inmem_entries
+        if not inmem_entries.contains(file_url):
+            inmem_entries.add(file_url)
+
+        if db.inmem_col_exists(file_url):
+            return
+        
+        job = {'_id': file_url}
+        count=1
+        with pd.read_csv(file_url, chunksize=CHUNK_SIZE, sep='\t', skiprows=75) as reader:
+            for chunk in reader:
+                logger.info("processing chunk %d | %s", count,file_url)
+                process_dataframe(chunk, job, db.inmem_db)
+                count += 1
+
+        logger.info("File loaded in memory: %s", str(file_url))
+
+class ExpiringSet():
+    def __init__(self, max_age_seconds=60):
+        assert max_age_seconds > 0
+        self.age = max_age_seconds
+        self.container = {}
+        self.lock = RLock()
+    
+    def contains(self, value):
+        with self.lock:
+            if value not in self.container:
+                return False
+            if time() - self.container[value] > self.age:
+                del self.container[value]
+                db.inmem_db[value].drop()
+                return False
+        
+        return True
+ 
+    def add(self, value):
+        with self.lock:
+            self.container[value] = time()
+
+inmem_entries = ExpiringSet(max_age_seconds=10 * 60)
 

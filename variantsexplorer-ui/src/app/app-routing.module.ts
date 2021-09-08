@@ -9,6 +9,7 @@ const routes: Routes = [
   {path: '', component: HomeComponent}, 
   {path: 'upload',component: UploadFormComponent},
   {path: 'job/:id',component: VariantsDetailsComponent},
+  {path: 'record',component: VariantsDetailsComponent},
   {path: 'help',component: HelpComponent}
 ];
 

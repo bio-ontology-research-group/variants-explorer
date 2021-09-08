@@ -2,18 +2,30 @@ import logging
 import uuid
 
 from pymongo import MongoClient
+from pymongo_inmemory import MongoClient as InMemMongoClient
 from bson import ObjectId
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 client = None
+inmem_client = None
 
 if not client:
   client = MongoClient()
   logger.info("Connected to mongodb server: %s", str(client))
 
 db = client['variantexplorer']
+
+def get_connection():
+  client = MongoClient()
+  return client['variantexplorer']
+
+if not inmem_client:
+  inmem_client = InMemMongoClient()
+  logger.info("Connected to mongodb server: %s", str(inmem_client))
+
+inmem_db = inmem_client['variantexplorer']
 
 def get_connection():
   client = MongoClient()
@@ -46,8 +58,8 @@ def get(id, forked_conn = None):
     col = db.jobs_col
   return col.find_one({"_id": ObjectId(str(id))})
 
-def find_records(job_id, filter, limit=None, offset=None, orderby=None) :
-  col = db[job_id]
+def find_records(job_id, filter, limit=None, offset=None, orderby=None, inmem=False) :
+  col = db[job_id] if not inmem else inmem_db[job_id]
 
   for key in filter:
     if isinstance(filter[key], list):
@@ -138,5 +150,10 @@ def next_seq_number(seq_name):
     db.seqs_col.insert_one({'_id': seq_name, "count":1})
   
   return seq['count']
+
+def inmem_col_exists(col_id):
+  return True if inmem_db[col_id].count() > 0 else False
+
+
 
 

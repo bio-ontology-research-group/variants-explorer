@@ -11,6 +11,7 @@ from rest_framework import status
 from variantsexplorer import db
 from django.http import HttpResponse
 from variantsexplorer.options import FIELD_OPTIONS
+from django.conf import settings
 
 logger = logging.getLogger(__name__) 
 
@@ -105,6 +106,29 @@ class RecordsView(APIView):
         except Exception as e:
             logger.exception("message")
 
+
+class InMemoryRecordsView(APIView):
+    """
+    List variant records by given criteria
+    """
+
+    service = VariantAnalyzer()
+    def get(self, request, format=None):
+        try:
+            file_url = request.GET.get('file', None)
+            limit = request.GET.get('limit', None)
+            offset = request.GET.get('offset', None)
+            orderby = request.GET.get('orderby', None)
+            query_params = request.GET.dict().copy()
+
+            if not file_url:
+                raise RuntimeException("'file' property is required")
+
+            result = self.service.find_inmemory_records(file_url, query_params, int(limit), int(offset), orderby)
+            return Response(result)
+        except Exception as e:
+            logger.exception("message")
+
 class FieldConfigView(APIView):
     """
     Fields configuration
@@ -151,8 +175,6 @@ class FindEntityByIris(APIView):
         except Exception as e:
             logger.exception("message")
     
-
-
 
 class AberowlDLQuery(APIView):
     """
