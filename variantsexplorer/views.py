@@ -1,5 +1,8 @@
 import logging
 import json
+import urllib
+import pymongo
+
 from variantsexplorer.aberowl import executeDlQuery
 from variantsexplorer.phenome_lookup import find_entity_by_iris, find_entity_by_startswith
 
@@ -126,6 +129,14 @@ class InMemoryRecordsView(APIView):
 
             result = self.service.find_inmemory_records(file_url, query_params, int(limit), int(offset), orderby)
             return Response(result)
+        except ValidationError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except urllib.error.HTTPError as e:
+            logger.exception("message")
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except pymongo.errors.InvalidName:
+            logger.exception("message")
+            return Response("invalid url", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.exception("message")
 
